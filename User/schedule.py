@@ -265,3 +265,10 @@ def addTask(task):
     red.close()
 
     return HttpResponse(datetime.now())
+
+def testTask():
+    task = Task.objects.filter(status=1).get()
+    logger = logging.getLogger('django')
+    logger.error(task)
+    addTask(task)
+    return HttpResponse(f'testTask: {datetime.now()}')

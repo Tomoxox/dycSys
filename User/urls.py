@@ -7,7 +7,8 @@ urlpatterns = [
     path('code', views.code,name='user-code'),
     path('logout', views.logout,name='user-logout'),
     path('GETOUTTHERENSCRAWLMF', schedule.commentTasks,name='user-commentTasks'),
-    path('test', schedule.updateHotTopics),
+    path('updateHotTopics', schedule.updateHotTopics),
+    path('testTask', schedule.testTask),
 
     path('index', user_login_required(views.index),name='user-index'),
     path('home', user_login_required(views.home),name='user-home'),
