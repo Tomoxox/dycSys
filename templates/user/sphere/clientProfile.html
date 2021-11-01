@@ -69,16 +69,16 @@
                 size: "lg",
                 cols: [[
                     {type: "checkbox", fixed: "left"},
-                    {field: "name", align: 'center', title: "姓名", width: 80},
-                    {field: "phone", align: 'center', title: "手机号", width: 100},
-                    {field: "type", align: 'center', title: "客户类型", width: 80},
+                    {field: "created_at", align: 'center', title: "创建时间", width: 180},
                     {field: "avatar_thumb", align: 'center', title: "头像", width: 150, templet: "#logoTpl"},
                     {field: "nickname", align: 'center', title: "账号", width: 150, templet: "#nameTpl"},
                     {field: "uid", align: 'center', title: "扫码私信", width: 150, templet: "#msgTpl"},
+                    {field: "name", align: 'center', title: "姓名", width: 80},
+                    {field: "phone", align: 'center', title: "手机号", width: 100},
+                    {field: "type", align: 'center', title: "客户类型", width: 80},
                     {field: "company", align: 'center', title: "公司名称", width: 180},
                     {field: "address", align: 'center', title: "详细地址", width: 180},
                     {field: "remark", align: 'center', title: "备注", width: 180},
-                    {field: "created_at", align: 'center', title: "创建时间", width: 180},
                     {field: "updated_at", align: 'center', title: "更新时间", width: 180},
                     {title: "操作", width: 300, align: "center", fixed: "right", templet: "#operationTpl"}
                 ]],
@@ -160,7 +160,7 @@
                     layer.close(index);
                     let idsStr = okUtils.tableBatchCheck(table);
                     if (idsStr) {
-                        okUtils.ajax("/product/deleteProduct", "delete", {idsStr: idsStr}, true).done(function (response) {
+                        okUtils.ajax("/product/deleteProduct", "post", {idsStr: idsStr}, true).done(function (response) {
                             okUtils.tableSuccessMsg(response.msg);
                         }).fail(function (error) {
                             console.log(error);
@@ -174,59 +174,69 @@
             }
 
             function updateById(id) {
-
+                okLayer.open('客户档案', '/updateClientProfile/' + id, "90%", "90%", null, function () {
+                    okUtils.tableSuccessMsg(response.msg);
+                })
             }
+
             function followUpById(id) {
 
             }
 
             function deleteById(id) {
                 okLayer.confirm("确定要删除吗？", function () {
-
+                    okUtils.ajax("/deleteMyClient", "post", {idsStr: id}).done(function (response) {
+                        okUtils.tableSuccessMsg(response.msg);
+                    }).fail(function (error) {
+                        console.log(error);
+                    });
                 })
             }
         })
+
         function confirmQR() {
             $('.task-selections').hide();
         }
+
         function showQRCode(uid) {
             $('#qrcode').empty();
             var qrcode = new QRCode(document.getElementById("qrcode"), {
                 width: 200,
                 height: 200
             });
-            qrcode.makeCode('snssdk1128://user/profile/' +  uid  +'?refer=web&gd_label=click_wap_detail_download_feature&needlaunchlog=1');
+            qrcode.makeCode('snssdk1128://user/profile/' + uid + '?refer=web&gd_label=click_wap_detail_download_feature&needlaunchlog=1');
 
             $('.task-selections').show();
         }
     </script>
     <!-- 行工具栏模板 -->
     <script type="text/html" id="operationTpl">
-        <a href="javascript:" title="删除" lay-event="deleteById">
-            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">删除</button>
-        </a>
         <a href="javascript:" title="编辑" lay-event="updateById">
             <button type="button" class="layui-btn layui-btn-primary layui-border-orange">编辑</button>
         </a>
-        <a href="javascript:" title="跟进" lay-event="followUpById">
-            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">跟进</button>
+        <a href="javascript:" title="删除" lay-event="deleteById">
+            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">删除</button>
         </a>
+{#        <a href="javascript:" title="跟进" lay-event="followUpById">#}
+{#            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">跟进</button>#}
+{#        </a>#}
     </script>
     <script type="text/html" id="logoTpl">
         {% verbatim %}
-        <img src="{{d.avatar_thumb}}"/>
+            <img src="{{ d.avatar_thumb }}"/>
         {% endverbatim %}
     </script>
 
     <script type="text/html" id="nameTpl">
         {% verbatim %}
-        <a href="https://www.douyin.com/user/{{ d.sec_uid }}" target="_blank">{{d.nickname}}</a>
+            <a href="https://www.douyin.com/user/{{ d.sec_uid }}" target="_blank">{{ d.nickname }}</a>
         {% endverbatim %}
     </script>
     <script type="text/html" id="msgTpl">
         {% verbatim %}
-        <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-normal" onclick="showQRCode({{d.uid}})">私信
-        </button>
+            <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-normal" onclick="showQRCode({{ d.uid }})">
+                私信
+            </button>
         {% endverbatim %}
     </script>
 

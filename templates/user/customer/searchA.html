@@ -192,7 +192,7 @@
                     $('#HOT_WORDS').append(
                         '                       <tr>\n' +
                         '                            <td>' + i + '</td>\n' +
-                        '                            <td>' + data.sug_list[i - 1].content + '</td>\n' +
+                        '                            <td><button class="layui-btn layui-btn-radius layui-btn-normal" onclick="hotWordVideos(\''+data.sug_list[i - 1].content+'\')">'+data.sug_list[i - 1].content+'</button></td>\n' +
                         '                            <td>' + data.sug_list[i - 1].extra_info.ranking_rule_score + '</td>\n' +
                         '                            <td>' + time + '</td>\n' +
                         '                            <td>\n' +
@@ -388,6 +388,10 @@
 
         function comments(videoId) {
             okLayer.open('查看评论', '/commentPage/' + videoId, "90%", "90%", null, function () {
+            })
+        }
+        function hotWordVideos(word) {
+            okLayer.open('相关视频', '/searchVideoByWords/' + word, "90%", "90%", null, function () {
             })
         }
 

@@ -77,6 +77,9 @@
     </div>
     <script type="text/javascript" src="{% static 'js/qrcode.min.js' %}"></script>
     <script>
+        $(function () {
+            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 250 + 'px');
+        });
         layui.use(["table", "form", "laydate", "okLayer", "okUtils"], function () {
             let table = layui.table;
             let form = layui.form;
@@ -224,7 +227,7 @@
             $('.task-selections').hide();
         }
 
-        function showQRCode(uid) {
+        function showQRCode(uid,id) {
             $('#qrcode').empty();
             var qrcode = new QRCode(document.getElementById("qrcode"), {
                 width: 200,
@@ -233,6 +236,8 @@
             qrcode.makeCode('snssdk1128://user/profile/' + uid + '?refer=web&gd_label=click_wap_detail_download_feature&needlaunchlog=1');
 
             $('.task-selections').show();
+            $.post('/updateStatusOfClue',{'clue':id},function (res) {
+            });
         }
     </script>
     <script type="text/html" id="toolbarTpl">
@@ -268,7 +273,7 @@
     </script>
     <script type="text/html" id="msgTpl">
         {% verbatim %}
-        <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-normal" onclick="showQRCode({{d.uid}})">私信
+        <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-normal" onclick="showQRCode({{d.uid}},{{d.id}})">私信
         </button>
         {% endverbatim %}
     </script>

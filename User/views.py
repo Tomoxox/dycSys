@@ -169,12 +169,12 @@ def leftMenus(request):
                     'fontFamily': "layui-icon",
                     'href': "/clientProfile",
                 },
-                {
-                    'title': "跟进记录",
-                    'icon': "&#xe623;",
-                    'fontFamily': "layui-icon",
-                    'href': "/followUpRec",
-                },
+                # {
+                #     'title': "跟进记录",
+                #     'icon': "&#xe623;",
+                #     'fontFamily': "layui-icon",
+                #     'href': "/followUpRec",
+                # },
             ]
         },
         {
@@ -259,6 +259,15 @@ def addWord(request):
         newWord = MyHotWord(words=words, index=index, Customer_id=customer['id'])
         newWord.save()
     return AjaxReturn(1, '添加成功')
+
+@require_POST
+def deleteMyHotWord(request):
+    id = request.POST.get('idsStr')
+    customer = request.session['customer']
+    word = MyHotWord.objects.filter(id=id, Customer_id=customer['id']).get()
+    if word:
+        word.delete()
+    return AjaxReturn(1, '删除成功')
 
 
 @require_POST
@@ -428,6 +437,15 @@ def aiClue(request):
     taskList = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/sphere/aiClue.html', locals())
 
+@require_POST
+def updateStatusOfClue(request):
+    clueId = request.POST.get('clue')
+    comm = Comment.objects.filter(Customer_id=request.session.get('customer')['id'],id=clueId).get()
+    if comm:
+        comm.status = 1
+        comm.save()
+    return AjaxReturn(1,'success')
+
 
 def clientProfile(request):
     if request.method == 'POST':
@@ -441,6 +459,31 @@ def clientProfile(request):
         return AjaxReturn(1, 'success', data, count)
     return render(request, 'user/sphere/clientProfile.html', locals())
 
+
+@require_POST
+def deleteMyClient(request):
+    id = request.POST.get('idsStr')
+    customer = request.session['customer']
+    con = Consumer.objects.filter(id=id, Customer_id=customer['id']).get()
+    if con:
+        con.delete()
+    return AjaxReturn(1, '删除成功')
+
+def updateClientProfile(request,clientId):
+    customer = request.session['customer']
+    client = Consumer.objects.filter(id=clientId,Customer_id=customer['id']).get()
+    if client:
+        if request.method == 'POST':
+            Consumer.objects.filter(id=clientId, Customer_id=customer['id']).update(**{
+                'name':request.POST.get('name'),
+                'phone':request.POST.get('phone'),
+                'type':request.POST.get('type'),
+                'company':request.POST.get('company'),
+                'address':request.POST.get('address'),
+                'remark':request.POST.get('remark'),
+            })
+            return AjaxReturn(1,'提交成交')
+        return render(request,'user/sphere/updateClientProfile.html',locals())
 
 def followUpRec(request):
     if request.method == 'POST':
@@ -546,6 +589,11 @@ def searchVideo(request, words):
         words = words.words
     else:
         return HttpResponse('')
+    return render(request, 'user/common/searchVideoA.html', locals())
+
+def searchVideoByWords(request, words):
+    if request.method == 'POST':
+        return AjaxReturn(1, '获取成功', dy_sign('search_video', request.POST.get('keyword')))
     return render(request, 'user/common/searchVideoA.html', locals())
 
 

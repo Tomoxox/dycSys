@@ -19,10 +19,12 @@ urlpatterns = [
     path('commentPageByID/<int:videoId>', user_login_required(views.commentPageByID),name='user-commentPageByID'),
     path('userPage/<str:userId>', user_login_required(views.userPage),name='user-userPage'),
     path('searchVideo/<str:words>', user_login_required(views.searchVideo),name='user-userPage'),
+    path('searchVideoByWords/<str:words>', user_login_required(views.searchVideoByWords),name='user-searchVideoByWords'),
 
 
     path('myHotWord', user_login_required(views.myHotWord),name='user-myHotWord'),
     path('addWord', user_login_required(views.addWord),name='user-addWord'),
+    path('deleteMyHotWord', user_login_required(views.deleteMyHotWord),name='user-deleteMyHotWord'),
     path('chooseTask', user_login_required(views.chooseTask),name='user-chooseTask'),
     path('addVideo', user_login_required(views.addVideo),name='user-addVideo'),
     path('addPeer', user_login_required(views.addPeer),name='user-addPeer'),
@@ -36,10 +38,13 @@ urlpatterns = [
     path('taskCenter', user_login_required(views.taskCenter),name='user-taskCenter'),
     path('marketingClue', user_login_required(views.marketingClue),name='user-marketingClue'),
 
+    path('updateStatusOfClue', user_login_required(views.updateStatusOfClue), name='user-updateSatusOfClue'),
 
     path('aiClue', user_login_required(views.aiClue),name='user-aiClue'),
     path('addConsumers', user_login_required(views.addConsumers),name='user-addConsumers'),
     path('clientProfile', user_login_required(views.clientProfile),name='user-clientProfile'),
+    path('deleteMyClient', user_login_required(views.deleteMyClient),name='user-deleteMyClient'),
+    path('updateClientProfile/<int:clientId>', user_login_required(views.updateClientProfile),name='user-updateClientProfile'),
     path('followUpRec', user_login_required(views.followUpRec),name='user-followUpRec'),
 
 
