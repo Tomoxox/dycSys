@@ -153,7 +153,7 @@ if not os.path.exists(log_path): os.mkdir(log_path)  # 如果不存在这个logs
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': True,
+    'disable_existing_loggers': False,
     'formatters': {
         # 日志格式
         'standard': {
@@ -209,7 +209,7 @@ LOGGING = {
     'loggers': {
         # 类型 为 django 处理所有类型的日志， 默认调用
         'django': {
-            'handlers': ['default', 'console'],
+            'handlers': ['info', 'console'],
             'level': 'INFO',
             'propagate': False
         },

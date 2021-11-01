@@ -5,6 +5,7 @@ import redis, json, math, re
 from DYAdmin.models import Task, Video, Peer, PeerVideo, Comment
 import threading
 from .API import scrawl,dy_sign
+import logging
 
 # Redis keys
 TASK_LIST = 'TASK_LIST'
@@ -21,13 +22,14 @@ def updateHotTopics(request):
     return HttpResponse(datetime.now())
 
 def taskBegin(task):
-    print(f'begin----------{task.id}-----------{datetime.now()}')
+    logger = logging.getLogger('django')
+    logger.error(f'begin----------{task.id} {task.title}-----------{datetime.now()}')
     # TODO 查看上次任务是否还在进行
 
     # 遍历task的video
     videoArr = task.video_set.all()
     for video in videoArr:
-        print(f'-------video {video.desc}-------')
+        logger.error(f'-------video {video.desc}-------')
         # 看看当前任务是否还在 TASK_LIST 里面
         if checkTask(task.id):
             # 查看视频上次评论数 对比本次新增，多20评论就请求第二页，多40就请求第三页（第一页都是高赞 作者回复）
@@ -98,7 +100,7 @@ def taskBegin(task):
     # 更新同行视频列表 不要更新总评论数
     peerArr = Peer.objects.filter(Customer_id=task.Customer_id).all()
     for peer in peerArr:
-        print(f'-------peer {peer.nickname}-------')
+        logger.error(f'-------peer {peer.nickname}-------')
         peerVedioList = scrawl('aweme_post', task.id, peer.sec_uid, 1)
         if peerVedioList and len(peerVedioList['aweme_list']) > 0:
             for video in peerVedioList['aweme_list']:
@@ -114,7 +116,7 @@ def taskBegin(task):
     # 过滤 或者 点赞高的
     peerVideoArr = task.peervideo_set.all()
     for peerV in peerVideoArr:
-        print(f'-------peerVideo {peerV.desc}-------')
+        logger.error(f'-------peerVideo {peerV.desc}-------')
         # 看看当前任务是否还在 TASK_LIST 里面
         if checkTask(task.id):
             # 查看视频上次评论数 对比本次新增，多20评论就请求第二页，多40就请求第三页（第一页都是高赞 作者回复）
@@ -184,7 +186,7 @@ def taskBegin(task):
         else:
             break
 
-    print(f'end=========={task.id}============{datetime.now()}')
+    logger.error(f'end=========={task.id} {task.title}============{datetime.now()}')
 
 
 def checkTask(id):
