@@ -266,9 +266,9 @@ def addTask(task):
 
     return HttpResponse(datetime.now())
 
-def testTask():
-    task = Task.objects.filter(status=1).get()
-    logger = logging.getLogger('django')
-    logger.error(task)
-    addTask(task)
+def testTask(request):
+    # task = Task.objects.filter(status=1).get()
+    # logger = logging.getLogger('django')
+    # logger.error(task)
+    # taskBegin(task)
     return HttpResponse(f'testTask: {datetime.now()}')
