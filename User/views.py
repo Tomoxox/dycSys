@@ -347,7 +347,7 @@ def peerMonitor(request):
 
 
 @require_POST
-def deleteMyHotWord(request):
+def deletePeer(request):
     id = request.POST.get('idsStr')
     customer = request.session['customer']
     peer = Peer.objects.filter(id=id, Customer_id=customer['id']).get()
