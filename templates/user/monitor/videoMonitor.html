@@ -1,0 +1,182 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+    .layui-table-view .layui-table[lay-size=lg] .layui-table-cell {
+    height: 80px;
+    line-height: 80px;
+}
+.layui-table tr {
+    transition: all .3s;
+    -webkit-transition: all .3s;
+    height: 80px;
+}
+    .layui-table img {
+    max-width: 100px;
+    height: 70px;
+}
+    .layui-table a {
+        font-weight: bold;
+        color: orange;
+    }
+    </style>
+    <table class="layui-hide" id="tableId" lay-filter="tableFilter"></table>
+<script>
+	layui.use(["table", "form", "laydate", "okLayer", "okUtils"], function () {
+		let table = layui.table;
+		let form = layui.form;
+		let util = layui.util;
+		let laydate = layui.laydate;
+		let okLayer = layui.okLayer;
+		let okUtils = layui.okUtils;
+		okLoading.close();
+		util.fixbar({});
+
+		laydate.render({elem: "#startTime", type: "datetime"});
+		laydate.render({elem: "#endTime", type: "datetime"});
+
+		let articleTable = table.render({
+			elem: "#tableId",
+			url: '/videoMonitor',
+            method: 'POST',
+			limit: 20,
+			page: true,
+			even: true,
+			toolbar: "#toolbarTpl",
+			size: "lg",
+			cols: [[
+				{field: "cover", align:'center', title: "封面", width: 150, templet: "#logoTpl"},
+				{field: "desc",align:'center', title: "标题", width: 400, templet: "#nameTpl"},
+				{field: "comment_num",align:'center', title: "评论数", width: 100},
+				{field: "like_num",align:'center', title: "点赞数", width: 100},
+				{field: "download_num",align:'center', title: "下载数", width: 100},
+				{field: "share_num",align:'center', title: "分享数", width: 100},
+				{field: "create_time",align:'center', title: "发布时间", width: 180},
+				{title: "操作", width: 300, align: "center", fixed: "right", templet: "#operationTpl"}
+			]],
+			done: function (res, curr, count) {
+				console.log(res, curr, count)
+			}
+		});
+
+		form.on("submit(search)", function (data) {
+			articleTable.reload({
+				where: data.field,
+				page: {curr: 1}
+			});
+			return false;
+		});
+
+		table.on("toolbar(tableFilter)", function (obj) {
+			switch (obj.event) {
+				case "batchEnabled":
+					batchEnabled();
+					break;
+				case "batchDisabled":
+					batchDisabled();
+					break;
+				case "batchDelete":
+					batchDelete();
+					break;
+				case "add":
+					add();
+					break;
+			}
+		});
+
+		table.on("tool(tableFilter)", function (obj) {
+			let data = obj.data;
+			switch (obj.event) {
+				case "updateById":
+					updateById(data.id);
+					break;
+				case "deleteById":
+					deleteById(data.id);
+					break;
+			}
+		});
+
+		function batchEnabled() {
+			okLayer.confirm("确定要批量上架吗？", function (index) {
+				layer.close(index);
+				let idsStr = okUtils.tableBatchCheck(table);
+				if (idsStr) {
+					okUtils.ajax("/product/update-product-status", "put", {idsStr: idsStr}, true).done(function (response) {
+						okUtils.tableSuccessMsg(response.msg);
+					}).fail(function (error) {
+						console.log(error);
+					});
+				}
+			});
+		}
+
+		function batchDisabled() {
+			okLayer.confirm("确定要批量下架吗？", function (index) {
+				layer.close(index);
+				let idsStr = okUtils.tableBatchCheck(table);
+				if (idsStr) {
+					okUtils.ajax("/product/update-product-status", "put", {idsStr: idsStr}, true).done(function (response) {
+						okUtils.tableSuccessMsg(response.msg);
+					}).fail(function (error) {
+						console.log(error);
+					});
+				}
+			});
+		}
+
+		function batchDelete() {
+			okLayer.confirm("确定要批量删除吗？", function (index) {
+				layer.close(index);
+				let idsStr = okUtils.tableBatchCheck(table);
+				if (idsStr) {
+					okUtils.ajax("/product/deleteProduct", "delete", {idsStr: idsStr}, true).done(function (response) {
+						okUtils.tableSuccessMsg(response.msg);
+					}).fail(function (error) {
+						console.log(error);
+					});
+				}
+			});
+		}
+
+		function add() {
+			okLayer.open("添加产品", "product-add.html", "90%", "90%", null, function () {
+				articleTable.reload();
+			})
+		}
+
+		function updateById(id) {
+			okLayer.open("查看详情", "/commentPageByID/" + id, "90%", "90%", null, function () {
+				articleTable.reload();
+			})
+		}
+
+		function deleteById(id) {
+			okLayer.confirm("确定要删除吗？", function () {
+				okUtils.ajax("/product/deleteProduct", "delete", {idsStr: id}).done(function (response) {
+					okUtils.tableSuccessMsg(response.msg);
+				}).fail(function (error) {
+					console.log(error);
+				});
+			})
+		}
+	})
+</script>
+<!-- 行工具栏模板 -->
+<script type="text/html" id="operationTpl">
+	<a href="javascript:" title="详情" lay-event="updateById"><button type="button" class="layui-btn layui-btn-primary layui-border-orange">查看详情</button></a>
+	<a href="javascript:" title="删除" lay-event="deleteById"><button type="button" class="layui-btn layui-btn-primary layui-border-orange">取消关注</button></a>
+</script>
+<script type="text/html" id="logoTpl">
+{% verbatim %}
+	<img src="{{d.cover}}"/>
+{% endverbatim %}
+</script>
+
+<script type="text/html" id="nameTpl">
+{% verbatim %}
+	<a href="https://www.douyin.com/video/{{d.aweme_id}}" target="_blank">{{d.desc}}</a>
+{% endverbatim %}
+</script>
+
+
+{% endblock body %}

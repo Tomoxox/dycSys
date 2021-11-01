@@ -1,0 +1,121 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        .layui-table a {
+            font-weight: bold;
+            color: orange;
+        }
+    </style>
+    <table class="layui-table" lay-size="lg" lay-skin="line">
+        <thead style="height: 80px;">
+        <tr>
+            <th>头像</th>
+            <th>用户</th>
+            <th>评论</th>
+            <th>点赞</th>
+            <th>时间</th>
+        </tr>
+        </thead>
+        <tbody id="comment-list">
+
+        </tbody>
+    </table>
+    <button onclick="getComments()" class="layui-btn layui-btn-fluid">加载更多</button>
+    <script>
+        let chatSocket = null;
+        var layer = null;
+        let page = 1;
+        layui.use(['layer', 'element'], function () {
+            layer = layui.layer;
+        });
+        $(function () {
+            $('.layui-btn').hide();
+            chatSocket = new WebSocket('ws://' + window.location.host + '/ws/search/');
+            chatSocket.onopen = function (e) {
+                console.log(e + ' ' + 'websocket connection success')
+                getComments();
+
+            };
+            chatSocket.onerror = function (e) {
+                console.error(e)
+            };
+            chatSocket.onclose = function (e) {
+                console.error(' ' + 'websocket closed unexpectedly 状态码:' + e.code);
+                chatSocket.close();
+            };
+            chatSocket.onmessage = function (e) {
+                var data = JSON.parse(e.data);
+                console.log('------获取数据------');
+                console.log(data);
+                msg = data.msg;
+                if (data.code === 1) {
+                    scene = data.scene;
+                    if (data.data !== '') {
+                        data = JSON.parse(data.data);
+                        console.log(data);
+                        add_comment_list(data)
+                    }
+                } else {
+                }
+                layer.closeAll();
+                layer.msg(msg);
+            }
+            okLoading.close();
+        });
+
+        function add_comment_list(data) {
+            console.log(data)
+            if (page === 2) {
+                if (data.C_20.comment.comments.length > 0) {
+                    for (var i = 0; i < data.C_20.comment.comments.length; i++) {
+                        let comm =data.C_20.comment.comments[i];
+                        var time = getYMDHMS(comm.createTime);
+                        $('#comment-list').append('<tr>\n' +
+                            '            <td><img src="' + comm.user.avatarUri + '" alt=""></td>\n' +
+                            '            <td><a target="_blank" href="https://www.douyin.com/user/' + comm.user.secUid + '">' + comm.user.nickname + '</a></td>\n' +
+                            '            <td>' + comm.text + '</td>\n' +
+                            '            <td>' + comm.diggCount + '</td>\n' +
+                            '            <td>' + time + '</td>\n' +
+                            '        </tr>')
+                    }
+                }
+            }else if (data.comments.length > 0) {
+                for (var i = 0; i < data.comments.length; i++) {
+                    let comm = data.comments[i];
+                        var time = getYMDHMS(comm.createTime);
+                    $('#comment-list').append('<tr>\n' +
+                        '            <td><img src="' + comm.user.avatar_168x168.url_list[0] + '" alt=""></td>\n' +
+                        '            <td><a target="_blank" href="https://www.douyin.com/user/' + comm.user.sec_uid + '">' + comm.user.nickname + '</a></td>\n' +
+                        '            <td>' + comm.text + '</td>\n' +
+                        '            <td>' + comm.digg_count + '</td>\n' +
+                        '            <td>' + time + '</td>\n' +
+                        '        </tr>')
+                }
+            }
+            $('.layui-btn').show();
+        }
+
+        function getComments() {
+            layer.load();
+            let dict = {
+                page: page,
+                scene: 'commentPage',
+                id: '{{videoId}}'
+            }
+            chatSocket.send(JSON.stringify(dict));
+            page++;
+        }
+        function getYMDHMS(timestamp) {
+            var date = new Date(timestamp * 1000);
+            var YY = date.getFullYear() + '-';
+            var MM = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+            var DD = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate());
+            var hh = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+            var mm = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+            var ss = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+            return YY + MM + DD + " " + hh + mm + ss;
+        }
+    </script>
+
+{% endblock body %}

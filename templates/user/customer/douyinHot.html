@@ -1,0 +1,52 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+    .layui-table a, .num {
+        font-weight: bold;
+        color: orange;
+    }
+    .layui-table img {
+        border-radius: 20px;
+    }
+    </style>
+    <table class="layui-table" lay-size="lg" lay-skin="line">
+                        <thead style="height: 80px;">
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>话题</th>
+                            <th>热度</th>
+                            <th>浏览人数</th>
+                            <th>更新时间</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for topic in topicData.data.word_list %}
+                            <tr>
+                            <td class="num">{{ forloop.counter }}</td>
+                            <td><img src="{{ topic.word_cover.url_list.0 }}" alt=""></td>
+                            <td><a target="_blank" class="link" href='' data-word="{{ topic.word }}" data-id="{{ topic.sentence_id }}">{{ topic.word }}</a></td>
+                            <td>{{ topic.hot_value }}</td>
+                            <td>{{ topic.view_count }}</td>
+                            <td>{{ topicData.data.active_time }}</td>
+                        </tr>
+                        {% endfor %}
+                        
+
+                        
+                        </tbody>
+                    </table>
+
+    <script>
+        $(function () {
+            okLoading.close();
+            $('.link').each(function () {
+                let word = $(this).attr('data-word')
+                let sentence_id = $(this).attr('data-id')
+                $(this).attr('href','https://www.douyin.com/hot/detail/'+sentence_id+'?&trending_topic='+word+'&previous_page=main_page&enter_method=trending_topic&modeFrom=hotDetail&tab_name=trend')
+            })
+        })
+    </script>
+
+{% endblock body %}

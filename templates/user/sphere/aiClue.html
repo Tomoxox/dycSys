@@ -1,0 +1,277 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        .layui-table-view .layui-table[lay-size=lg] .layui-table-cell {
+            height: 80px;
+            line-height: 80px;
+        }
+
+        .layui-table tr {
+            transition: all .3s;
+            -webkit-transition: all .3s;
+            height: 80px;
+        }
+
+        .layui-table img {
+            max-width: 100px;
+            height: 70px;
+        }
+
+        .layui-table a {
+            font-weight: bold;
+            color: orange;
+        }
+    </style>
+    <div class="task-selections" style="display: none">
+        <div class="layui-layer-shade1"
+             style="z-index: 19891026; background-color: rgb(0, 0, 0); opacity: 0.8;"></div>
+        <div class="layui-layer1 layui-layer-page" style="z-index: 19891027; width: 300px; position: fixed;">
+            <div class="layui-layer-content">
+                <div style="padding: 50px; line-height: 22px; background-color: #fff; color: #fff; font-weight: 300;">
+                    <div id="qrcode"></div>
+                </div>
+            </div>
+            <span class="layui-layer-setwin"></span>
+            <div class="layui-layer-btn layui-layer-btn-c">
+                <button onclick="confirmQR()" class="layui-btn layui-btn-normal">确认</button>
+            </div>
+            <span class="layui-layer-resize"></span>
+        </div>
+    </div>
+    <div class="ok-body">
+        <!--模糊搜索区域-->
+        <div class="layui-row">
+            <form class="layui-form layui-col-md12 my-search">
+                <div class="layui-inline">
+                    <label class="layui-form-label">请选择任务</label>
+                    <div class="layui-input-inline">
+                        <select name="task" lay-verify="">
+                            <option value="" selected>请选择任务</option>
+                            {% for task in taskList %}
+                                <option value="{{ task.id }}">{{ task.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <label class="layui-form-label">联系方式</label>
+                    <div class="layui-input-inline">
+                        <select name="contact" lay-verify="">
+                            <option value="" selected>联系方式</option>
+                            <option value="1">手机+微信</option>
+                            <option value="2">手机</option>
+                            <option value="3">微信</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn" lay-submit="" lay-filter="search">
+                        <i class="layui-icon layui-icon-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+        <!--数据表格-->
+        <table class="layui-hide" id="tableId" lay-filter="tableFilter"></table>
+    </div>
+    <script type="text/javascript" src="{% static 'js/qrcode.min.js' %}"></script>
+    <script>
+        layui.use(["table", "form", "laydate", "okLayer", "okUtils"], function () {
+            let table = layui.table;
+            let form = layui.form;
+            let util = layui.util;
+            let laydate = layui.laydate;
+            let okLayer = layui.okLayer;
+            let okUtils = layui.okUtils;
+            okLoading.close();
+            util.fixbar({});
+
+            laydate.render({elem: "#startTime", type: "datetime"});
+            laydate.render({elem: "#endTime", type: "datetime"});
+
+            let articleTable = table.render({
+                elem: "#tableId",
+                url: '/aiClue',
+                method: 'POST',
+                limit: 20,
+                page: true,
+                even: true,
+                toolbar: "#toolbarTpl",
+                size: "lg",
+                cols: [[
+                    {type: "checkbox", fixed: "left"},
+                    {field: "TaskTitle", align: 'center', title: "任务名称", width: 100,},
+                    {field: "nickname", align: 'center', title: "用户", width: 100, templet: "#nameTpl"},
+                    {field: "avatar_thumb", align: 'center', title: "头像", width: 100, templet: "#logoTpl"},
+                    {field: "phone", align: 'center', title: "手机号", width: 100},
+                    {field: "vx", align: 'center', title: "微信号", width: 100},
+                    {field: "uid", align: 'center', title: "扫码私信", width: 150, templet: "#msgTpl"},
+                    {field: "VideoTitle", align: 'center', title: "视频", width: 200, templet: "#linkTpl"},
+                    {field: "text", align: 'center', title: "评论内容", width: 300},
+                    {field: "hit_word", align: 'center', title: "命中关键词", width: 100},
+                    {field: "status", align: 'center', title: "处理进度", width: 100},
+                    {field: "created_at", align: 'center', title: "采集时间", width: 150},
+                ]],
+                done: function (res, curr, count) {
+                    console.log(res, curr, count)
+                }
+            });
+
+            form.on("submit(search)", function (data) {
+                articleTable.reload({
+                    where: data.field,
+                    page: {curr: 1}
+                });
+                return false;
+            });
+
+            table.on("toolbar(tableFilter)", function (obj) {
+                switch (obj.event) {
+                    case "batchEnabled":
+                        batchEnabled();
+                        break;
+                    case "batchDisabled":
+                        batchDisabled();
+                        break;
+                    case "batchDelete":
+                        batchDelete();
+                        break;
+                    case "add":
+                        add();
+                        break;
+                }
+            });
+
+            table.on("tool(tableFilter)", function (obj) {
+                let data = obj.data;
+                switch (obj.event) {
+                    case "updateById":
+                        updateById(data.id);
+                        break;
+                    case "deleteById":
+                        deleteById(data.id);
+                        break;
+                }
+            });
+
+            function batchEnabled() {
+                okLayer.confirm("确认批量加入吗？", function (index) {
+                    layer.close(index);
+                    let idsStr = okUtils.tableBatchCheck(table);
+                    if (idsStr) {
+                        okUtils.ajax("/addConsumers", "post", {idsStr: idsStr}, true).done(function (response) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        }).fail(function (error) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        });
+                    }
+                });
+            }
+
+            function batchDisabled() {
+                okLayer.confirm("确定要批量下架吗？", function (index) {
+                    layer.close(index);
+                    let idsStr = okUtils.tableBatchCheck(table);
+                    if (idsStr) {
+                        okUtils.ajax("/product/update-product-status", "put", {idsStr: idsStr}, true).done(function (response) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        }).fail(function (error) {
+                            console.log(error);
+                        });
+                    }
+                });
+            }
+
+            function batchDelete() {
+                okLayer.confirm("确定要批量删除吗？", function (index) {
+                    layer.close(index);
+                    let idsStr = okUtils.tableBatchCheck(table);
+                    if (idsStr) {
+                        okUtils.ajax("/product/deleteProduct", "delete", {idsStr: idsStr}, true).done(function (response) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        }).fail(function (error) {
+                            console.log(error);
+                        });
+                    }
+                });
+            }
+
+            function add() {
+                okLayer.open("添加产品", "product-add.html", "90%", "90%", null, function () {
+                    articleTable.reload();
+                })
+            }
+
+            function updateById(id) {
+                okLayer.open("编辑产品", "product-edit.html?id=" + id, "90%", "90%", null, function () {
+                    articleTable.reload();
+                })
+            }
+
+            function deleteById(id) {
+                okLayer.confirm("确定要删除吗？", function () {
+                    okUtils.ajax("/product/deleteProduct", "delete", {idsStr: id}).done(function (response) {
+                        okUtils.tableSuccessMsg(response.msg);
+                    }).fail(function (error) {
+                        console.log(error);
+                    });
+                })
+            }
+        })
+
+        function confirmQR() {
+            $('.task-selections').hide();
+        }
+
+        function showQRCode(uid) {
+            $('#qrcode').empty();
+            var qrcode = new QRCode(document.getElementById("qrcode"), {
+                width: 200,
+                height: 200
+            });
+            qrcode.makeCode('snssdk1128://user/profile/' + uid + '?refer=web&gd_label=click_wap_detail_download_feature&needlaunchlog=1');
+
+            $('.task-selections').show();
+        }
+    </script>
+    <script type="text/html" id="toolbarTpl">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="batchEnabled">加入客户档案</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="batchDel">批量删除</button>
+        </div>
+    </script>
+    <!-- 行工具栏模板 -->
+    <script type="text/html" id="operationTpl">
+        <a href="javascript:" title="删除" lay-event="deleteById">
+            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">数据追踪</button>
+        </a>
+        <a href="javascript:" title="删除" lay-event="deleteById">
+            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">取消关注</button>
+        </a>
+    </script>
+    <script type="text/html" id="logoTpl">
+        {% verbatim %}
+        <img src="{{d.avatar_thumb}}"/>
+        {% endverbatim %}
+    </script>
+
+    <script type="text/html" id="nameTpl">
+        {% verbatim %}
+        <a href="https://www.douyin.com/user/{{d.sec_uid}}" target="_blank">{{d.nickname}}</a>
+        {% endverbatim %}
+    </script>
+    <script type="text/html" id="linkTpl">
+        {% verbatim %}
+        <a href="https://www.douyin.com/video/{{d.VideoId}}" target="_blank">{{d.VideoTitle}}</a>
+        {% endverbatim %}
+    </script>
+    <script type="text/html" id="msgTpl">
+        {% verbatim %}
+        <button class="layui-btn layui-btn-sm layui-btn-radius layui-btn-normal" onclick="showQRCode({{d.uid}})">私信
+        </button>
+        {% endverbatim %}
+    </script>
+
+
+{% endblock body %}

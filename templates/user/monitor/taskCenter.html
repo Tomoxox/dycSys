@@ -1,0 +1,134 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        .box-shadow {
+            box-shadow: 0px 0px 10px #ccc;
+            border-radius: 10px;
+            padding: 25px;
+        }
+
+        .padding10 {
+            padding: 10px;
+        }
+
+        .padding20 {
+            padding: 20px;
+        }
+
+        .updated {
+            line-height: 40px;
+            font-size: 16px;
+        }
+
+        .pull-right {
+            float: right;
+        }
+
+        .btn-div {
+            padding-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+    </style>
+    <div class="layui-tab-content padding20">
+        <div class="btn-div">
+            <button type="button" onclick="addTask()" class="layui-btn layui-btn-warm layui-btn-radius">新增任务</button>
+            <a href="" class="layui-btn layui-btn-warm layui-btn-radius">查看询盘</a>
+        </div>
+        <ul class="layui-row">
+            {% for dic in taskArr %}
+                <li class="layui-col-md4 box-shadow">
+                    <div class="layui-card">
+                        <div class="layui-card-header padding20">
+                            <span style="color: orange;font-weight: bold;">{{ dic.task.title }}</span>
+                            <span class="pull-right">
+                            <button onclick="executeTask({{ dic.task.id }})" type="button" class="layui-btn layui-btn-primary layui-border-orange">执行</button>
+                            <button onclick="updateTask({{ dic.task.id }})" type="button"
+                                    class="layui-btn layui-btn-primary layui-border-orange">编辑</button>
+                            <button onclick="delTask({{ dic.task.id }})" type="button"
+                                    class="layui-btn layui-btn-primary layui-border-red">删除</button>
+                        </span>
+                        </div>
+                        <div class="layui-card-body">
+                            <div class="padding10">
+                                <span class="updated">创建时间: {{ dic.task.created_at | date:"Y-m-d H:i:s" }}</span>
+                                <span>
+                                <span class="layui-form ok-form" style="float:right;">
+                                    <input lay-filter="switchTask" style="margin-top: 0;" type="checkbox" name="status" lay-skin="switch"
+                                           lay-text="运行|停止" value="{{ dic.task.id }}"
+                                           {% if dic.task.status == 1 %}checked{% endif %}>
+                                </span>
+                            </span>
+                            </div>
+                            <div class="padding10">
+                                <button type="button" class="layui-btn layui-btn-normal">视频：{{ dic.video }}个</button>
+                                <button type="button" class="pull-right layui-btn layui-btn-normal">询盘：{{ dic.comment }}个</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        $(function () {
+            okLoading.close();
+        });
+        var layer = null;
+        let okLayer = null;
+        layui.use(['layer', 'form', 'element', 'okLayer'], function () {
+            layer = layui.layer;
+            okLayer = layui.okLayer;
+            var form = layui.form;
+            form.on('switch(switchTask)', function (data) {
+                 $.post('{% url "user-operateTask" %}', {
+                    op: 'status',
+                    id: data.value,
+                }, function (res) {
+                });
+            });
+        });
+
+        function addTask() {
+            okLayer.open('新增任务', '/updateTask/0', "90%", "90%", null, function () {
+                window.location.href = window.location.href;
+            })
+        }
+
+        function updateTask(id) {
+            okLayer.open('编辑任务', '/updateTask/' + id, "90%", "90%", null, function () {
+                window.location.href = window.location.href;
+            })
+        }
+
+        function executeTask(id){
+            okLayer.confirm("是否立即执行？", function () {
+                $.post('{% url "user-operateTask" %}', {
+                    op: 'execute',
+                    id: id,
+                }, function (data) {
+                    layer.msg(data.msg);
+                    window.location.href = window.location.href;
+                });
+            });
+         }
+
+        function delTask(id) {
+            okLayer.confirm("确定要删除吗？", function () {
+                $.post('{% url "user-operateTask" %}', {
+                    op: 'delete',
+                    id: id,
+                }, function (data) {
+                    layer.msg(data.msg);
+                    window.location.href = window.location.href;
+                });
+            });
+        }
+
+    </script>
+
+{% endblock body %}

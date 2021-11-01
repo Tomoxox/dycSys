@@ -1,0 +1,50 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        .padding20 {
+            padding: 20px;
+        }
+    </style>
+    <form class="layui-form padding20" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">手机号</label>
+            <div class="layui-input-block">
+                <input type="text" disabled name="title" placeholder="请输入标题"
+                       autocomplete="off" class="layui-input" value="{{ customer.phone }}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">机构</label>
+            <div class="layui-input-block">
+                <input type="text" disabled name="title" placeholder="请输入机构名称"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">邮箱</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" required lay-verify="required" placeholder="请输入邮箱"
+                       autocomplete="off" class="layui-input" value="{{ customer.email | default:'' }}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        $(function () {
+            okLoading.close();
+        })
+        layui.use('form', function () {
+            var form = layui.form;
+            form.on('submit(formDemo)', function (data) {
+                layer.msg(JSON.stringify(data.field));
+                return false;
+            });
+        });
+    </script>
+{% endblock body %}

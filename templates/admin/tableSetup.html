@@ -1,0 +1,190 @@
+<script>
+    layui.use(["element", "jquery", "table", "form", "laydate", "okLayer", "okUtils"], function () {
+        let head = {{head | safe}};
+        console.log(head);
+        let table = layui.table;
+        let form = layui.form;
+        let laydate = layui.laydate;
+        let okLayer = layui.okLayer;
+        let okUtils = layui.okUtils;
+        let $ = layui.jquery;
+        let loadIndex;
+
+        laydate.render({elem: "#startTime", type: "datetime"});
+        laydate.render({elem: "#endTime", type: "datetime"});
+
+        okLoading.close($);
+
+        let listTable = table.render({
+            url: "{{links.table | safe}}",
+            cols: [head],
+            elem: "{{lists.elem}}",
+            method: "{{lists.method}}",
+            toolbar: "{{lists.left}}",
+            defaultToolbar: [{{lists.right | safe}}],
+            page: {{lists.page}},
+            limit: "{{lists.limit}}",
+            limits: [{{lists.limits}}],
+            loading: {{lists.load}},
+            autoSort: {{lists.sort}},
+            skin: "{{lists.skin}}",
+            even: {{lists.even}},
+            size: "{{lists.size}}",
+            request: {
+                pageName: "{{lists.curr}}",
+                limitName: "{{lists.nums}}"
+            },
+            text:{
+                none: "{{lists.none}}"
+            },
+            done: function(res, curr, count){
+                console.log('---table data---');
+                console.log(res);
+                console.log(curr);
+                console.log(count);
+                listsHandle();
+            }
+        });
+
+        // 数据排序
+        table.on('sort(tableFilter)', function(obj){
+            listTable.reload({
+                initSort: obj,
+                where: {
+                    field: obj.field,
+                    order: obj.type
+                }
+            });
+            console.log(obj);
+        });
+
+        // 数据搜索
+        form.on("submit(search)", function (data){
+            listTable.reload({
+                where: data.field,
+                page: {
+            {{lists.curr}}: 1}
+            });
+            return false;
+        });
+
+        table.on("toolbar(tableFilter)", function(obj){
+            let obtain = $('#'+obj.event);
+            switch(obj.event){
+                case "addData":
+                    add(obtain.data('name'), obtain.data('link'));
+                    break;
+                case "batchOpen":
+                    batchOpen(obtain.data('name'), obtain.data('link'));
+                    break;
+                case "batchShut":
+                    batchShut(obtain.data('name'), obtain.data('link'));
+                    break;
+                case "batchMove":
+                    batchMove(obtain.data('name'), obtain.data('link'));
+                    break;
+            }
+        });
+
+        table.on("tool(tableFilter)", function(obj){
+            let obtain = $('#'+obj.event);
+            switch(obj.event){
+                case "updateData":
+                    update(obtain.data('name'), obtain.data('link'), obj.data.id);
+                    break;
+                case "deleteData":
+                    deletes(obtain.data('name'), obtain.data('link'), obj.data.id);
+                    break;
+                case "refreshData":
+                    refresh(obtain.data('name'), obtain.data('link'), obj.data.id);
+                    break;
+                case "other":
+                    other(obtain.data('name'), obtain.data('link'), obj.data.id);
+                    break;
+            }
+        });
+
+        form.on("select(party_type)", function(data){
+
+        });
+
+        function add(name, link){
+            okLayer.open(name, link, "90%", "90%", null, function(){
+                listTable.reload();
+            })
+        }
+
+        function update(name, link, sign){
+            okLayer.open(name, link+'?id='+sign, "90%", "90%", function(layero){
+                //let iframeWin = window[layero.find("iframe")[0]["name"]];
+                //iframeWin.initForm(data);
+            }, function(){
+                listTable.reload();
+            })
+        }
+
+        function other(name, link, sign){
+            okLayer.open(name, link+'?id='+sign, "90%", "90%", null, function(){
+                listTable.reload();
+            })
+        }
+        function deletes(name, link, sign){
+            okLayer.confirm("确定要删除吗？", function(){
+                okUtils.ajax(link, "post", {ids: sign}, true).done(function(response){
+                    console.log(response);
+                    okUtils.tableSuccessMsg(response.msg);
+                }).fail(function(error){
+                    console.log(error);
+                    listTable.reload();
+                });
+            })
+        }
+
+        function refresh(name, link, sign){
+            okLayer.confirm("确定要刷新吗？", function(){
+                okUtils.ajax(link, "post", {ids: sign}, true).done(function(response){
+                    console.log(response);
+                    okUtils.tableSuccessMsg(response.msg);
+                }).fail(function(error){
+                    console.log(error);
+                    listTable.reload();
+                });
+            })
+        }
+
+        function batchOpen(){
+            okLayer.confirm("确定要批量启用吗？", function(index){
+                layer.close(index);
+                let idsStr = okUtils.tableBatchCheck(table);
+
+            });
+        }
+
+        function batchShut(){
+            okLayer.confirm("确定要批量停用吗？", function(index){
+                layer.close(index);
+                let idsStr = okUtils.tableBatchCheck(table);
+
+            });
+        }
+
+        function batchMove(){
+            okLayer.confirm("确定要批量删除吗？", function (index){
+                layer.close(index);
+                let idsStr = okUtils.tableBatchCheck(table);
+                if(idsStr){
+                    okUtils.ajax("{{links.delete | safe}}", "post", {ids: idsStr}, true).done(function (response){
+                        console.log(response);
+                        okUtils.tableSuccessMsg(response.msg);
+                    }).fail(function(error){
+                        console.log(error);
+                    });
+                }
+            });
+        }
+    });
+
+    function listsHandle(){
+        console.log('back');
+    }
+</script>

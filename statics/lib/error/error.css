@@ -1,0 +1,49 @@
+@font-face {font-family: "iconfont";
+  src: url('./fonts/iconfont.eot'); /* IE9*/
+  src: url('./fonts/iconfont.eot#iefix') format('embedded-opentype'), /* IE6-IE8 */
+  url('./fonts/iconfont.ttf') format('truetype'), /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
+  url('./fonts/iconfont.svg#iconfont') format('svg'); /* iOS 4.1- */
+}
+
+.box {
+    text-align: center;
+    font-size: 14px;
+}
+
+.box .iconfont {
+  font-family:"iconfont" !important;
+  font-size: 300px;
+  font-style:normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-403:before { content: "\e63c"; }
+
+.icon-404:before { content: "\e62f"; }
+
+.icon-github:before { content: "\eaf6"; }
+
+.icon-logo-weibo:before { content: "\e618"; }
+
+.icon-caidan:before { content: "\e790"; }
+
+.icon-zhifubao:before { content: "\e7ce"; }
+
+.icon-shangsheng:before { content: "\e750"; }
+
+.icon-qq:before { content: "\e623"; }
+
+.icon-tianjia:before { content: "\e620"; }
+
+.icon-icon-test:before { content: "\e6cc"; }
+
+.icon-wechat:before { content: "\e66a"; }
+
+.icon-weixin:before { content: "\e626"; }
+
+.icon-web-icon-:before { content: "\e6da"; }
+
+.icon-icon-test1:before { content: "\e71c"; }
+
+.icon-WechatIMG:before { content: "\e630"; }

@@ -1,0 +1,11 @@
+{% extends './base.html' %}
+
+{% block body %}
+{% include './where.html' %}
+    <table class="layui-hide" id="tableId" lay-filter="tableFilter"></table>
+{% endblock body %}
+
+{% block script %}
+{% include './tableSetup.html' %}
+{% include './entry.html' %}
+{% endblock script %}

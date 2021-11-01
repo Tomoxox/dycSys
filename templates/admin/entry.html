@@ -1,0 +1,26 @@
+{% if menu %}
+    <script type="text/html" id="headTpl">
+        <div class="layui-btn-container">
+            {% for vo in menu %}
+                <button id="{{ vo.sign }}" class="layui-btn {{ vo.size }} {{ vo.face }}" lay-event="{{ vo.sign }}"
+                        data-name="
+                        {{ vo.name }}" data-link='{{ vo.link }}'>{{ vo.name }}</button>
+            {% endfor %}
+        </div>
+    </script>
+{% endif %}
+{% if hand %}
+    <script type="text/html" id="listTpl">
+        {% for vo in hand %}
+            <a id="{{ vo.sign }}" href="javascript:void(0);" title="{{ vo.name }}" lay-event="{{ vo.sign }}" data-name="
+                    {{ vo.name }}" data-link="{{ vo.link }}"><i class="layui-icon">&{{ vo.icon }}</i></a>
+        {% endfor %}
+    </script>
+{% endif %}
+{% if image %}
+    {% verbatim %}
+    <script type="text/html" id="imageTpl">
+        <img src="{{d.image}}" alt="" height="100%">
+    </script>
+    {% endverbatim %}
+{% endif %}

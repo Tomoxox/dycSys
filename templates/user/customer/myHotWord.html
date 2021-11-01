@@ -1,0 +1,165 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        a {
+            color: orange;
+            font-weight: bold;
+        }
+    </style>
+    <table class="layui-hide" id="tableId" lay-filter="tableFilter"></table>
+    <script>
+        layui.use(["table", "form", "laydate", "okLayer", "okUtils"], function () {
+            let table = layui.table;
+            let form = layui.form;
+            let util = layui.util;
+            let laydate = layui.laydate;
+            let okLayer = layui.okLayer;
+            let okUtils = layui.okUtils;
+            okLoading.close();
+            util.fixbar({});
+
+            laydate.render({elem: "#startTime", type: "datetime"});
+            laydate.render({elem: "#endTime", type: "datetime"});
+
+            let articleTable = table.render({
+                elem: "#tableId",
+                url: '/myHotWord',
+                method: 'POST',
+                limit: 20,
+                page: true,
+                even: true,
+                toolbar: "#toolbarTpl",
+                size: "lg",
+                cols: [[
+                    {field: "words", title: "热词", width: 200, templet: "#nameTpl", align: "center"},
+                    {field: "index", title: "热度", width: 200, align: "center"},
+                    {field: "status", title: "关注状态", width: 200, align: "center"},
+                    {field: "created_at", title: "关注时间", width: 200, align: "center"},
+                    {field: "updated_at", title: "更新时间", width: 200, align: "center"},
+                    {title: "操作", width: 200, align: "center", fixed: "right", templet: "#operationTpl"}
+                ]],
+                done: function (res, curr, count) {
+                    console.log(res, curr, count)
+                }
+            });
+
+            form.on("submit(search)", function (data) {
+                articleTable.reload({
+                    where: data.field,
+                    page: {curr: 1}
+                });
+                return false;
+            });
+
+            table.on("toolbar(tableFilter)", function (obj) {
+                switch (obj.event) {
+                    case "batchEnabled":
+                        batchEnabled();
+                        break;
+                    case "batchDisabled":
+                        batchDisabled();
+                        break;
+                    case "batchDelete":
+                        batchDelete();
+                        break;
+                    case "add":
+                        add();
+                        break;
+                }
+            });
+
+            table.on("tool(tableFilter)", function (obj) {
+                let data = obj.data;
+                switch (obj.event) {
+                    case "updateById":
+                        updateById(data.id);
+                        break;
+                    case "deleteById":
+                        deleteById(data.id);
+                        break;
+                }
+            });
+
+            function batchEnabled() {
+                okLayer.confirm("确定要批量上架吗？", function (index) {
+                    layer.close(index);
+                    let idsStr = okUtils.tableBatchCheck(table);
+                    if (idsStr) {
+                        okUtils.ajax("/product/update-product-status", "put", {idsStr: idsStr}, true).done(function (response) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        }).fail(function (error) {
+                            console.log(error);
+                        });
+                    }
+                });
+            }
+
+            function batchDisabled() {
+                okLayer.confirm("确定要批量下架吗？", function (index) {
+                    layer.close(index);
+                    let idsStr = okUtils.tableBatchCheck(table);
+                    if (idsStr) {
+                        okUtils.ajax("/product/update-product-status", "put", {idsStr: idsStr}, true).done(function (response) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        }).fail(function (error) {
+                            console.log(error);
+                        });
+                    }
+                });
+            }
+
+            function batchDelete() {
+                okLayer.confirm("确定要批量删除吗？", function (index) {
+                    layer.close(index);
+                    let idsStr = okUtils.tableBatchCheck(table);
+                    if (idsStr) {
+                        okUtils.ajax("/product/deleteProduct", "delete", {idsStr: idsStr}, true).done(function (response) {
+                            okUtils.tableSuccessMsg(response.msg);
+                        }).fail(function (error) {
+                            console.log(error);
+                        });
+                    }
+                });
+            }
+
+            function add() {
+                okLayer.open("添加产品", "product-add.html", "90%", "90%", null, function () {
+                    articleTable.reload();
+                })
+            }
+
+            function updateById(id) {
+                okLayer.open("相关视频", "/searchVideo/" + id, "90%", "90%", null, function () {})
+            }
+
+            function deleteById(id) {
+                okLayer.confirm("确定要删除吗？", function () {
+                    okUtils.ajax("/product/deleteProduct", "delete", {idsStr: id}).done(function (response) {
+                        okUtils.tableSuccessMsg(response.msg);
+                    }).fail(function (error) {
+                        console.log(error);
+                    });
+                })
+            }
+
+        })
+    </script>
+    <!-- 行工具栏模板 -->
+    <script type="text/html" id="operationTpl">
+        <a href="javascript:" title="删除" lay-event="deleteById">
+            <button type="button" class="layui-btn layui-btn-primary layui-border-orange">取消关注</button>
+        </a>
+    </script>
+
+    {% verbatim %}
+    <script type="text/html" id="nameTpl">
+        <a href="javascript:" title="" lay-event="updateById">
+            <button class="layui-btn layui-btn-warm layui-border-orange" style="background-color: #fff0">
+                {{d.words}}
+            </button>
+        </a>
+    </script>
+    {% endverbatim %}
+
+{% endblock body %}

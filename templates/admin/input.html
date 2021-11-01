@@ -1,0 +1,119 @@
+<form class="layui-form layui-form-pane ok-form" lay-filter="filter">
+    {% if field %}
+        {% for vo in field %}
+            {% if vo.types == 'input' %}
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{{ vo.title }}</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input" type="{{ vo.class }}" name="{{ vo.field }}" placeholder="{{ vo.warns|default:'' }}"
+                               value="{{ vo.value|default:'' }}" {{ vo.reads|default:'' }} lay-verify="{{ vo.musts|default:'required' }}" autocomplete="{{ vo.write|default:'off' }}"/>
+                    </div>
+                </div>
+            {% elif vo.types == 'datetime' %}
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{{ vo.title }}</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input datetime" type="{{ vo.class }}" name="{{ vo.field }}" placeholder="{{ vo.warns|default:'' }}"
+                               value="{{ vo.value|default:'' }}" {{ vo.reads|default:'' }} lay-verify="{{ vo.musts|default:'required' }}" autocomplete="{{ vo.write|default:'off' }}"/>
+                    </div>
+                </div>
+            {% elif vo.types == 'textarea' %}
+                <div class="layui-form-item  layui-form-text">
+                    <label class="layui-form-label">{{ vo.title }}</label>
+                    <div class="layui-input-block">
+                            <textarea class="layui-input" type="{{ vo.class }}" name="{{ vo.field }}" placeholder="
+                                    {{ vo.warns|default:'' }}"
+                                      value="{{ vo.value|default:'' }}" {{ vo.reads|default:'' }} lay-verify="
+                                    {{ vo.musts|default:'required' }}" autocomplete="{{ vo.write|default:'off' }}"
+                                      style="min-height: 200px"></textarea>
+                    </div>
+                </div>
+            {% elif vo.types == 'select' %}
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{{ vo.title }}</label>
+                    <div class="layui-input-block">
+                        <select id="{{ vo.signs|default:'' }}" name="{{ vo.field }}" lay-verify="
+                                    {{ vo.musts|default:'required' }}" lay-filter="{{ vo.signs|default:'' }}">
+                            {% if vo.warns %}
+                                <option value="">{{ vo.warns }}</option>
+                            {% endif %}
+                            {% if vo.quick %}
+                                {% for key,value in vo.quick.items %}
+                                    <option value="{{ key }}">{{ value }}</option>
+                                {% endfor %}
+                            {% endif %}
+
+                        </select>
+                    </div>
+                </div>
+            {% elif vo.types == 'selects' %}
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{{vo.title}}</label>
+                    <div class="layui-input-block">
+                        <div id="{{vo.signs}}" class="xm-select-demo"></div>
+                    </div>
+                </div>
+                <script>
+                    layui.use(["jquery", "xmSelect"], function () {
+                        let xmSelect = layui.xmSelect;
+                        let dlSelect = {{ vo.quick | safe }};
+
+                        xmSelect.render({
+                            el: '#{{vo.signs}}',
+                            name: '{{vo.field}}',
+                            tips: "{{vo.warns|default:'请选择数据'}}",
+                            layVerify: "{{vo.musts|default:'required'}}",
+                            layVerType: 'msg',
+                            filterable: true,
+                            data: dlSelect
+                        });
+                    });
+                </script>
+            {% elif vo.types == 'one_image' %}
+                <div class="layui-form-item">
+                    <label class="layui-form-label">{{vo.title}}</label>
+                    <div class="layui-input-block">
+                        <input class="layui-input" type="text" id="image_{{vo.field}}" placeholder="{{vo.warns}}"
+                               lay-verify="{{vo.musts}}" autocomplete="{{vo.write}}" readonly="readonly"
+                               style="padding-right: 120px;"/>
+                        <input type="hidden" name="{{vo.field}}"/>
+                        <button type="button" class="layui-btn" id="upload_{{vo.field}}"
+                                style="position: absolute;top: 0;right: 0;">
+                            <i class="layui-icon">&#xe67c;</i>上传图片
+                        </button>
+                    </div>
+                    <script>
+                        layui.use(["jquery", "upload"], function () {
+                            let $ = layui.jquery;
+                            let upload = layui.upload;
+
+                            upload.render({
+                                elem: '#upload_{{vo.field}}'
+                                , url: ".........."
+                                , data: {config: 'default_image'}
+                                , acceptMime: 'image/jpg, image/png'
+                                , done: function (res) {
+                                    layer.msg(res.tips);
+
+                                    if (res.code === 1) {
+                                        $('#image_{{vo.field}}').val(res.data.link).attr('onclick', 'window.open("' + res.data.link + '")').next('input').val(res.data.path);
+                                    }
+                                }
+                                , error: function () {
+                                    layer.msg('error');
+                                }
+                            });
+                        });
+                    </script>
+                </div>
+            {% endif %}
+        {% endfor %}
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="add">提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    {% endif %}
+</form>

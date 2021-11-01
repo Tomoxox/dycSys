@@ -1,0 +1,206 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        .rm-kw {
+            margin-bottom: 10px;
+        }
+
+        .new-word {
+            text-align: center;
+            margin-left: 10px;
+            -webkit-appearance: none;
+            background-color: #FFF;
+            background-image: none;
+            border-radius: 4px;
+            border: 1px solid #DCDFE6;
+            -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+            color: #606266;
+            display: inline-block;
+            font-size: inherit;
+            height: 38px;
+            line-height: 38px;
+            outline: 0;
+            -webkit-transition: border-color .2s cubic-bezier(.645, .045, .355, 1);
+            transition: border-color .2s cubic-bezier(.645, .045, .355, 1);
+            width: 80px;
+        }
+
+        .fetch-list {
+            display: inline-block;
+        }
+    </style>
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">任务名称</label>
+            <div class="layui-input-block">
+                <input type="text" name="title" required lay-verify="required" placeholder="请输入任务名称" autocomplete="off"
+                       class="layui-input" value="{{ task.title }}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">时间范围</label>
+            <div class="layui-input-block">
+                <div class="layui-btn-group">
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">0</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">1</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">2</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">3</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">4</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">5</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">6</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">7</button>
+                    <button type="button" class="day layui-btn layui-btn-primary layui-btn-sm">14</button>
+                </div>
+                <span> 采集最近几天评论 ( 0 : 所有评论 )</span>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">匹配词</label>
+            <div class="layui-input-block">
+                <div class="fetch-list">
+
+
+                </div>
+                <input type="text" placeholder="+" class="new-word">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">推荐词</label>
+            <div class="layui-input-block">
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">多少</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">钱</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">买</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">价</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">链接</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">怎么</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">卖</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">费用</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">合作</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">联系</button>
+                <button type="button" class="add-kw layui-btn layui-btn-sm layui-btn-primary layui-border-orange">想要</button>
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">监控同行</label>
+            <div class="layui-input-block">
+                {% for peer in peerArr %}
+                    <input type="checkbox" name="expert-{{ peer.id }}" title="{{ peer.nickname }}">
+                {% endfor %}
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">任务说明</label>
+            <div class="layui-input-block">
+                <textarea name="desc" placeholder="请输入任务说明" class="layui-textarea">{{ task.remark | default:'' }}</textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        okLoading.close();
+        let day = {{ task.id | default:0 }};
+        {% if task %}
+        let wordArr = '{{ task.filter_words }}'.split(',');
+        {% else %}
+        let wordArr = [];
+        {% endif %}
+        layui.use('form', function () {
+            var form = layui.form;
+
+            form.on('submit(formDemo)', function (data) {
+                console.log(data.field);
+                dict = data.field;
+                dict.day = day;
+                dict.words = wordArr.join(',');
+                if (wordArr.length < 1){
+                    layer.msg('请至少添加一个匹配词');
+                    return false;
+                }
+                $.post('',dict,function (res) {
+                    alert(res.msg)
+                })
+                return false;
+            });
+
+        });
+        Array.prototype.remove = function (val) {
+                var index = this.indexOf(val);
+                if (index > -1) {
+                    this.splice(index, 1);
+                }
+            };
+        $(function () {
+            initForm();
+            $('.day').click(function () {
+                day = $(this).text();
+                switchBtn();
+            });
+
+            $('.add-kw').click(function () {
+                kw = $(this).text();
+                newWord(kw);
+            });
+
+            $('body').on('click', '.rm-kw', function () {
+                kw = $(this).attr('data-kw');
+                wordArr.remove(kw)
+                $(this).remove();
+            });
+
+            $(".new-word").blur(function () {
+                var word = $(this).val().trim()
+                if (word !== '') {
+                    newWord(word);
+                    $(this).val('')
+                }
+            })
+        });
+
+        function newWord(word) {
+            if (wordArr.indexOf(word) !== -1){
+                    layer.msg('已添加');return false;
+                }
+            wordArr.push(word)
+            console.log(wordArr)
+            $('.fetch-list').append('<div class="rm-kw layui-btn layui-btn-sm layui-btn-radius layui-btn-warm" data-kw="' + word + '">' + word + ' <i class="layui-icon">&#x1006;</i></div>');
+        }
+
+        function switchBtn() {
+            $('.day').each(function () {
+                if ($(this).text() == day) {
+                    $(this).removeClass('layui-btn-primary')
+                } else {
+                    $(this).addClass('layui-btn-primary')
+                }
+            });
+        }
+
+        function initForm() {
+            switchBtn();
+            {% if task %}
+                let peerIds = {{ task.peer_monitor_ids | safe }};
+                for (var j=0;j < peerIds.length;j++){
+                    var name = 'expert-'+peerIds[j];
+                    console.log(name);
+                    $(':checkbox[name="'+name+'"]').attr("checked", true);
+                }
+            {% endif %} 
+
+            for (var i=0;i < wordArr.length;i++){
+                $('.fetch-list').append('<div class="rm-kw layui-btn layui-btn-sm layui-btn-radius layui-btn-warm" data-kw="' + wordArr[i] + '">' + wordArr[i] + ' <i class="layui-icon">&#x1006;</i></div>');
+            }
+
+
+        }
+    </script>
+
+{% endblock body %}

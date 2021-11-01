@@ -1,0 +1,205 @@
+<script>
+    let initData;
+
+    {% if info %}
+        initData = {{ info | safe }};
+        console.log(initData);
+    {% endif %}
+
+    layui.use(["element", "jquery", "form", "laydate", "okLayer", "okUtils"], function(){
+        let $ = layui.jquery;
+        let form = layui.form;
+        let laydate = layui.laydate;
+        let okLayer = layui.okLayer;
+        let okUtils = layui.okUtils;
+
+        okLoading.close();
+
+        {#laydate.render();#}
+        laydate.render({elem: '.datetime', format: 'yyyy-MM-dd'});
+
+        form.val("filter", initData);
+
+        form.on("select(party_type)", function(data){
+            getCarryUsersLists(okUtils, form, data.value);
+        });
+
+        form.on("submit(add)", function(data){
+            console.log(data.field);
+            okUtils.ajax("", "post", data.field, true).done(function(response){
+                console.log(response);
+                if(response.code === 1){
+                    okLayer.greenTickMsg(response.msg, function(){
+                        parent.layer.close(parent.layer.getFrameIndex(window.name));
+                    });
+                }else{
+                    console.log(response.msg);
+                    okLayer.redCrossMsg(response.msg, function(){
+                        parent.layer.close(parent.layer.getFrameIndex(window.name));
+                    });
+                }
+            }).fail(function (error) {
+                console.log(error)
+            });
+            return false;
+        });
+    });
+
+    $(function(){
+        $('.layui-col-space10,.layui-colla-title').on('click', '.click-add', function(e){
+            if($(this).closest('.layui-col-space10').length !== 0){
+                let html = $(this).closest('.layui-row').clone(true, true);
+
+                $(this).closest('.layui-row').after(html);
+
+                clickAct($(this).closest('.layui-colla-content'));
+            }
+
+            if($(this).closest('.layui-colla-title').length !== 0){
+                let html = $(this).closest('.layui-colla-item').clone(true, true);
+
+                $(this).closest('.layui-colla-item').after(html);
+
+                clickAct($(this).closest('.layui-collapse'));
+            }
+
+            layui.element.render();
+            layui.form.render('select');
+
+            /*if($('.datetime').length !== 0){
+                $('.datetime').each(function(index, item){
+                    $(item).removeAttr("lay-key");
+                    layui.laydate.render({elem: item, format: 'yyyy-MM-dd'});
+                });
+            }*/
+
+            e.stopPropagation();
+        });
+
+        //移动操作
+        $('.layui-col-space10,.layui-colla-title').on('click', '.click-act', function(e){
+            let obj,mode,copy,html = $(this);
+
+            if($(this).closest('.layui-col-space10').length !== 0){
+                obj = $(this).closest('.layui-colla-content');
+                mode = $(this).data('mode');
+                copy = $(this).closest('.layui-row');
+                html = $(this).closest('.layui-row').clone(true, true);
+            }
+
+            if($(this).closest('.layui-colla-title').length !== 0){
+                obj = $(this).closest('.layui-collapse');
+                mode = $(this).data('mode');
+                copy = $(this).closest('.layui-colla-item');
+                html = $(this).closest('.layui-colla-item').clone(true, true);
+            }
+
+            if(mode === 1){
+                if(copy.prev().length !== 0){
+                    copy.prev().before(html);
+                    copy.remove();
+                }
+            }else{
+                if(copy.next().length !== 0) {
+                    copy.next().after(html);
+                    copy.remove();
+                }
+            }
+
+            clickAct(obj);
+
+            e.stopPropagation();
+        });
+
+        //删除一列
+        $('.layui-col-space10,.layui-colla-title').on('click', '.click-del', function(e){
+            let obj,click = $(this);
+
+            e.stopPropagation();
+
+            layer.confirm('确定移除？', {
+                btn: ['确定', '取消']
+            },function(index){
+                if(click.closest('.layui-col-space10').length !== 0){
+                    if(click.closest('.layui-colla-content').children('.layui-row').length > 1){
+                        obj = click.closest('.layui-colla-content');
+
+                        click.closest('.layui-row').remove();
+
+                        clickAct(obj);
+                    }else{
+                        layer.msg("{:lang('others_01')}");
+                    }
+                }else if(click.closest('.layui-colla-title').length !== 0){
+                    if(click.closest('.layui-collapse').children('.layui-colla-item').length > 1){
+                        obj = click.closest('.layui-collapse');
+
+                        click.closest('.layui-colla-item').remove();
+
+                        clickAct(obj);
+                    }else{
+                        layer.msg("{:lang('others_01')}");
+                    }
+                }else{
+                    layer.msg("{:lang('others_01')}");
+                }
+
+                layer.close(index);
+            });
+        });
+    });
+
+    //序列操作
+    function clickAct(obj){
+        if($(obj).children('.layui-row').length > 1){
+            $(obj).children('.layui-row').each(function(i){
+                $(this).find('input,select').each(function(v){
+                    let name = $(this).attr('name');
+
+                    if(name !== undefined && name !== ''){
+                        name = name.replace(/\d+/g, i);
+                        $(this).attr('name', name);
+                    }
+                });
+            });
+        }
+
+        if($(obj).children('.layui-colla-item').length > 0){
+            $(obj).children('.layui-colla-item').each(function(i){
+                $(this).find('span').eq(0).html(i + 1);
+
+                $(this).find('input,select').each(function(){
+                    let name = $(this).attr('name');
+
+                    if(name !== undefined && name !== ''){
+                        name = name.replace(/\d+/g, i);
+                        $(this).attr('name', name);
+                    }
+                });
+            });
+        }
+    }
+
+    //用户列表
+    function getCarryUsersLists(okUtils, form, type){
+        okUtils.ajax("/Madmin.php/carry.users/getCarryUsersLists", "post", {types: type}, true).done(function(response){
+            let html1 = "<option value>请选择用户名称</option>";
+            let html2 = '<dd lay-value class="layui-select-tips">请选择用户名称</dd>';
+
+            if(response.code === 1){
+                $.each(response.data, function(i, v){
+                    html1 += "<option value='"+v.id+"'>"+v.name+"</option>";
+                    html2 += "<dd lay-value='"+v.id+"'>"+v.name+"</dd>";
+                });
+            }
+
+            $("#party_id").html(html1).next().children().eq(1).html(html2);
+
+            form.render("select");
+
+            layer.msg(response.msg, {icon: 1, time: 1000});
+        }).fail(function(error){
+            console.log(error);
+        });
+    }
+</script>

@@ -1,0 +1,45 @@
+{% extends '../base.html' %}
+
+{% block body %}
+    <div class="layui-form" action="">
+    <div class="layui-form-item">
+        <label class="layui-form-label">新增</label>
+        <div class="layui-input-block">
+            <input type="number" name="title" required  lay-verify="required" placeholder="新增查询条数" autocomplete="off" class="layui-input" id="number">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" onclick="addDeposit()">立即提交</button>
+        </div>
+    </div>
+</div>
+
+{% endblock body %}
+
+
+
+{% block script %}
+<script>
+	layui.use('layer', function(){
+		var layer = layui.layer;
+	});
+	okLoading.close();
+	function addDeposit() {
+	    let number = $('#number').val().trim();
+        number = parseInt(number);
+        if (number <= 0 || isNaN(number)){
+            layer.alert('数量错误');
+            return false;
+        }
+		$.post("",{
+			number:number
+		},function(data){
+			alert(data.msg);
+			if (data.code === 1){
+                parent.layer.close(parent.layer.getFrameIndex(window.name));
+			}
+		},'json');
+	}
+</script>
+{% endblock script %}

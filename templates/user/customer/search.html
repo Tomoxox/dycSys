@@ -1,0 +1,399 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+        <ul class="layui-tab-title" style="text-align: center;">
+            <li class="layui-this">热门搜索</li>
+            <li>热门视频</li>
+            <li>达人锁定</li>
+            <li>查找门店</li>
+        </ul>
+        <div class="layui-tab-content">
+
+            <div class="search-container">
+                <img src="{% static 'images/search_logo.png' %}">
+                <div class="search-input">
+                    <input type="text" class="search">
+                </div>
+                <div class="find-btn" onclick="search()">查 询</div>
+            </div>
+
+            <div class="layui-tab-item layui-show" data-tab="1">
+                <div id="content-div1">
+                    <table class="layui-table" lay-size="lg" lay-skin="line">
+                        <colgroup>
+                            <col width="50">
+                            <col width="200">
+                            <col width="150">
+                            <col width="150">
+                            <col width="100">
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>关键词</th>
+                            <th>指数</th>
+                            <th>更新时间</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="HOT_WORDS">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="layui-tab-item" data-tab="2">
+                <table class="layui-table" lay-size="lg" lay-skin="line">
+                    <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                    </thead>
+                </table>
+                <ul class="hot-video-ul layui-row" id="HOT_VIDEOS">
+
+
+                </ul>
+            </div>
+            <div class="layui-tab-item" data-tab="3">
+                <table class="layui-table" lay-size="lg" lay-skin="line">
+                    <thead>
+                    <tr>
+                        <th></th>
+                    </tr>
+                    </thead>
+                </table>
+                <ul class="hot-expert-ul layui-row _3636d166d0756b63d5645bcd4b9bcac4-scss" id="HOT_EXPERTS">
+
+                </ul>
+            </div>
+            <div class="layui-tab-item" data-tab="4"></div>
+        </div>
+    </div>
+
+
+
+    <script>
+        let chatSocket = null;
+        let layer = null;
+        let okLayer = null;
+        let peerList = null;
+        layui.use(['layer', 'element', 'okLayer'], function () {
+            layer = layui.layer;
+            okLayer = layui.okLayer;
+        });
+        $(function () {
+            chatSocket = new WebSocket('ws://' + window.location.host + '/ws/search/');
+            chatSocket.onopen = function (e) {
+                console.log(e + ' ' + 'websocket connection success')
+
+            };
+            chatSocket.onerror = function (e) {
+                console.error(e)
+            };
+            chatSocket.onclose = function (e) {
+                console.error(' ' + 'websocket closed unexpectedly 状态码:' + e.code);
+                chatSocket.close();
+            };
+            chatSocket.onmessage = function (e) {
+                var data = JSON.parse(e.data);
+                console.log('------获取数据------');
+                console.log(data);
+                msg = data.msg;
+                if (data.code === 1) {
+                    scene = data.scene;
+                    if (data.data !== '') {
+                        data = JSON.parse(data.data);
+                        console.log(data);
+                        switch (scene) {
+                            case "hot_words":
+                                hot_words(data)
+                                break;
+                            case "hot_videos":
+                                hot_videos(data)
+                                break;
+                            case "hot_experts":
+                                hot_experts(data)
+                                break;
+                            case "hot_stores":
+                                break;
+                        }
+                    }
+                } else {
+                }
+                layer.closeAll();
+                layer.msg(msg);
+            }
+            okLoading.close();
+        });
+
+        function search() {
+            let tab = $('.layui-show').attr('data-tab');
+            console.log(tab);
+            let keyword = $('.search').val().trim();
+            console.log(keyword);
+            if (keyword !== '') {
+                layer.load();
+                let dict = {}
+                switch (tab) {
+                    case '1':
+                        dict.scene = 'hot_words';
+                        dict.keyword = keyword;
+                        break;
+                    case '2':
+                        dict.scene = 'hot_videos';
+                        dict.keyword = keyword;
+                        break;
+                    case '3':
+                        dict.scene = 'hot_experts';
+                        dict.keyword = keyword;
+                        break;
+                    case '4':
+                        dict.scene = 'hot_stores';
+                        dict.keyword = keyword;
+                        return false;
+                        break;
+                }
+                console.log(dict)
+                chatSocket.send(JSON.stringify(dict));
+            }
+
+        }
+
+
+        function hot_words(data) {
+            if (data.sug_list.length > 0) {
+                $('#HOT_WORDS').empty();
+                var time = getYMDHMS(new Date().getTime() / 1000)
+                for (var i = 1; i <= data.sug_list.length; i++) {
+                    $('#HOT_WORDS').append(
+                        '                       <tr>\n' +
+                        '                            <td>' + i + '</td>\n' +
+                        '                            <td>' + data.sug_list[i - 1].content + '</td>\n' +
+                        '                            <td>' + data.sug_list[i - 1].extra_info.ranking_rule_score + '</td>\n' +
+                        '                            <td>' + time + '</td>\n' +
+                        '                            <td>\n' +
+                        '                                <button onclick="addWord('+'\''+data.sug_list[i - 1].content+'\','+'\''+data.sug_list[i - 1].extra_info.ranking_rule_score+'\''+')" type="button" class="layui-btn layui-btn-radius layui-btn-warm">加入关注</button>\n' +
+                        '                            </td>\n' +
+                        '                        </tr>')
+                }
+            }
+        }
+
+        function hot_videos(data) {
+            if (data.data.length > 0) {
+                $('#HOT_VIDEOS').empty();
+                for (var i = 0; i < data.data.length; i++) {
+                    let awemeInfo = data.data[i].aweme_info;
+                    var time = getYMDHMS(awemeInfo.create_time);
+                    {#console.log(time)#}
+                    $('#HOT_VIDEOS').append('<li class="a3cc5072a10a34f3d46c4e722ef788c1-scss layui-col-xs3 box-shadow">\n' +
+                        '                        <div class="_863f6ea4f8ed8c3f88c51527f1ea8d43-scss">\n' +
+                        '                            <a href="https://www.douyin.com/video/' + awemeInfo.aweme_id + '"\n' +
+                        '                               class="caa4fd3df2607e91340989a2e41628d8-scss a074d7a61356015feb31633ad4c45f49-scss b388acfeaeef33f0122af9c4f71a93c9-scss"\n' +
+                        '                               target="_blank" rel="noopener noreferrer">\n' +
+                        '                                <div class="c1b7c8e6be13150a7516bfc20bbb8ad1-scss ">\n' +
+                        '                                    <div class="f34e96e88162611d7208f348d4f89234-scss _46cb4690b43b2c3500c78191b9c87d80-scss">\n' +
+                        '                                        <div class="_1a19094785cdb4907c48fb16eae14f86-scss"\n' +
+                        '                                             style="background-image: url("' + awemeInfo.video.cover.url_list[0] + '");">\n' +
+                        '                                        </div>\n' +
+                        '                                        <div class="_1a19094785cdb4907c48fb16eae14f86-scss"\n' +
+                        '                                             style="background-image: url("' + awemeInfo.video.cover.url_list[0] + '");">\n' +
+                        '                                        </div>\n' +
+                        '                                        <div class="_0474a1af38e207e9b0d4bf802e141d52-scss">\n' +
+                        '                                        </div>\n' +
+                        '                                        <img src="' + awemeInfo.video.cover.url_list[0] + '"\n' +
+                        '                                             alt=""\n' +
+                        '                                             class="c0efa8c116eec8c11854d9bda213b4e5-scss">\n' +
+                        '                                    </div>\n' +
+                        '                                    <div class="_1a451682eeb2d4df81bf8e1ada549729-scss _825ee6a2309eb4a4d9f707ef61be8629-scss">\n' +
+                        '                                        <div class="a19d91dabb2ea86fa5cb7ea590c80064-scss">\n' +
+                        '                                            <div class="ad67e6d4c79ab72997256d1847e19b10-scss">\n' +
+                        '                                                <svg width="20" height="18" fill="none"\n' +
+                        '                                                     xmlns="http://www.w3.org/2000/svg"\n' +
+                        '                                                     class="" viewBox="0 0 18 17">\n' +
+                        '                                                    <path d="M9.12 3.225l-.721.693A1 1 0 009.938 3.8l-.819-.574zm6.94 2.812h-1a1 1 0 001.906.425l-.905-.425zm0 0h1a1 1 0 00-1.904-.425l.905.425zm-.001.15l-1-.022 1 .023zm.002.084l1 .018a1 1 0 00-.092-.437l-.908.419zm-.24 1.406l.748.664a1 1 0 00.215-.393l-.962-.27zm-.239.469l.84.541a.996.996 0 00.09-.174l-.93-.367zm-.24.468l.86.512a1 1 0 00.076-.157l-.935-.355zm-.146.238l-.842-.539.842.539zm-2.29 2.745l-.707-.707-.002.002.71.705zm-3.03 2.722l-.636-.772.637.772zm-.276.233l-.707-.707.707.707zm-.605.2l.017-1h-.013l-.004 1zm-.903-.49l.625-.78a.936.936 0 00-.032-.026l-.593.806zm-3.307-2.909l.719-.695-.003-.003-.716.699zM2.4 8.152l.907-.42a1 1 0 00-.013-.027l-.894.447zM1.938 6.27l-.705-.709a1 1 0 00-.294.73l1-.021zm.003-.08l1-.026-1 .026zM11.99.818c-1.444 0-2.831.608-3.69 1.832L9.938 3.8c.432-.616 1.165-.98 2.054-.98v-2zm5.07 5.219c0-2.808-2.26-5.219-5.07-5.219v2c1.634 0 3.07 1.444 3.07 3.219h2zm0 0h-2 2zm-1.905-.425l1.81.85-1.81-.85zm1.903.599l.002-.174h-2l-.002.128 2 .046zm-.09-.359a.979.979 0 01.084.307c.005.04.005.07.005.074V6.21l-1.999-.046v.093c0 .018 0 .058.005.107.003.024.015.166.089.325l1.816-.838zm-.185 2.096c.158-.564.266-1.055.277-1.66l-2-.034c-.006.359-.065.664-.202 1.153l1.925.54zm-.272.565c.037-.092.064-.155.085-.2l.014-.027a.517.517 0 01-.042.055l-1.495-1.328c-.132.149-.22.313-.272.42a4.839 4.839 0 00-.15.345l1.86.735zm-.234.456c.029-.077.044-.109.056-.134.014-.026.035-.065.089-.148L14.74 7.604a3.06 3.06 0 00-.333.656l1.87.709zm-.24.421c.057-.087.111-.175.164-.264l-1.718-1.023c-.042.069-.085.14-.13.21l1.685 1.077zm-2.424 2.914c.863-.863 1.762-1.874 2.425-2.915l-1.686-1.075c-.552.865-1.338 1.76-2.153 2.576l1.414 1.414zm-3.101 2.787c.548-.452 1.832-1.51 3.103-2.79l-1.419-1.41c-1.195 1.204-2.412 2.207-2.957 2.656l1.273 1.543zm-.206.168c-.02.02-.032.03-.018.018l.044-.038.18-.149-1.273-1.543c-.117.097-.275.226-.347.298l1.414 1.414zM9 15.752c.215 0 .796.018 1.307-.493l-1.414-1.414c.01-.01.032-.03.066-.05a.402.402 0 01.098-.038c.026-.007.04-.007.03-.006H9v2zm-.023 0H9v-2h.012l-.035 2zm-1.485-.693c.21.209.664.69 1.498.693l.009-2c-.014 0-.01-.002.005.003.016.004.029.01.035.014.005.003-.002 0-.025-.02a2.548 2.548 0 01-.107-.104l-1.415 1.414zm-.026-.017l.033.027.021.017.004.003-.01-.008a.772.772 0 01-.022-.022l1.415-1.414c-.063-.063-.153-.134-.19-.164l-1.25 1.56zm-3.4-2.993A29.95 29.95 0 007.5 15.067l1.186-1.61a27.982 27.982 0 01-3.181-2.8L4.067 12.05zM1.493 8.571c.578 1.253 1.592 2.472 2.578 3.481l1.43-1.397c-.933-.956-1.758-1.98-2.193-2.923l-1.815.84zM.939 6.293c.008.374.094.828.19 1.21.095.38.228.8.376 1.096l1.789-.894a4.046 4.046 0 01-.226-.689 4.03 4.03 0 01-.13-.767l-2 .044zm.002-.077v.017a.973.973 0 01.291-.67L2.645 6.98a1.006 1.006 0 00.298-.716l-.002-.1-1.999.052zm-.003-.18c0 .08.002.142.003.18l2-.051c-.002-.036-.003-.076-.003-.128h-2zM6.008.819c-2.81 0-5.07 2.41-5.07 5.219h2c0-1.776 1.435-3.219 3.07-3.219v-2zM9.84 2.531C8.79 1.44 7.477.818 6.008.818v2c.859 0 1.669.35 2.391 1.1l1.44-1.387z"\n' +
+                        '                                                          fill="#fff">\n' +
+                        '                                                    </path>\n' +
+                        '                                                </svg>\n' +
+                        '                                                <span class="_04b09e32a7964282872626a4aff3353b-scss">\n' +
+                        '                                                    ' + awemeInfo.statistics.digg_count + '\n' +
+                        '                                                </span>\n' +
+                        '                                            </div>\n' +
+                        '                                            <span class="d170ababc38fdbf760ca677dbaa9206a-scss">\n' +
+                        '                                                ' + awemeInfo.video.duration + '\n' +
+                        '                                            </span>\n' +
+                        '                                        </div>\n' +
+                        '                                    </div>\n' +
+                        '                                </div>\n' +
+                        '                            </a>\n' +
+                        '                            <a href="https://www.douyin.com/video/' + awemeInfo.aweme_id + '"\n' +
+                        '                               class="caa4fd3df2607e91340989a2e41628d8-scss a074d7a61356015feb31633ad4c45f49-scss _9c976841beef15a22bcd1540d1e84c02-scss"\n' +
+                        '                               target="_blank" rel="noopener noreferrer">\n' +
+                        '                                <p class="_1d72ef4c67644daab0f1496c89e038aa-scss b2c8df63da2ed9be2bc3d38cf902e5b4-scss">\n' +
+                        '                                    <span class="_9b365a9d76cfb9db759d93e586f25133-scss">\n' +
+                        '                                        <span>\n' +
+                        '                                            <span>\n' +
+                        '                                                <span>\n' +
+                        '                                                    <span>\n' +
+                        '                                                        ' + awemeInfo.desc + '\n' +
+                        '                                                    </span>\n' +
+                        '                                                </span>\n' +
+                        '                                            </span>\n' +
+                        '                                        </span>\n' +
+                        '                                    </span>\n' +
+                        '                                </p>\n' +
+                        '                            </a>\n' +
+                        '                            <div class="d8d25680ae6956e5aa7807679ce66b7e-scss">\n' +
+                        '                                <a href="https://www.douyin.com/user/' + awemeInfo.author.sec_uid + '"\n' +
+                        '                                   class="caa4fd3df2607e91340989a2e41628d8-scss a074d7a61356015feb31633ad4c45f49-scss _9c247910afecae7b8e47d4c75867113a-scss"\n' +
+                        '                                   target="_blank" rel="noopener noreferrer">\n' +
+                        '                                    <div class="_751cf1d80303de5fb1b5c1bfe1bbf0e0-scss fdb06c9b21889e1013b042468f3e3f2a-scss">\n' +
+                        '                                        <img src="' + awemeInfo.author.avatar_thumb.url_list[0] + '"\n' +
+                        '                                             alt="" class="_6bae574eea4bc99f3da09b6be51a0a0d-scss">\n' +
+                        '                                    </div>\n' +
+                        '                                    <p class="_31dc42fa6181927e1afa821a0db10ed0-scss _7cfe89a4f1868679513e50ad5cf7215c-scss">\n' +
+                        '                                        <span class="_9b365a9d76cfb9db759d93e586f25133-scss">\n' +
+                        '                                            <span>\n' +
+                        '                                                <span>\n' +
+                        '                                                    <span>\n' +
+                        '                                                        <span>\n' +
+                        '                                                            ' + awemeInfo.author.nickname + '\n' +
+                        '                                                        </span>\n' +
+                        '                                                    </span>\n' +
+                        '                                                </span>\n' +
+                        '                                            </span>\n' +
+                        '                                        </span>\n' +
+                        '                                    </p>\n' +
+                        '                                </a>\n' +
+                        '                                <span class="b32855717201aaabd3d83c162315ff0a-scss">\n' +
+                        '                                    ' + time + '\n' +
+                        '                                </span>\n' +
+                        '                            </div>\n' +
+                        '                        </div>\n' +
+                        '                        <div class="button-row">\n' +
+                        '                            <button onclick="comments(' + '\'' + awemeInfo.aweme_id + '\'' + ')" type="button" class="pull-left layui-btn layui-btn-warm layui-border-orange"><i\n' +
+                        '                                    class="layui-icon">&#xe63a;</i>查看评论\n' +
+                        '                            </button>\n' +
+                        '                            <button type="button" class="pull-right layui-btn layui-btn-warm layui-border-orange"><i\n' +
+                        '                                    class="layui-icon">&#xe624;</i>加入监控\n' +
+                        '                            </button>\n' +
+                        '                        </div>\n' +
+                        '                    </li>')
+                }
+            }
+        }
+
+        function hot_experts(data) {
+            if (data.user_list.length > 0) {
+                $('#HOT_EXPERTS').empty();
+                peerList = data.user_list;
+                for (var i = 0; i < data.user_list.length; i++) {
+                    let user = data.user_list[i].user_info;
+                    $('#HOT_EXPERTS').append('<li class="be642325476cd60928ab49ab10619761-scss layui-col-md6">\n' +
+                        '    <a href="//www.douyin.com/user/' + user.sec_uid + '"\n' +
+                        '    class="caa4fd3df2607e91340989a2e41628d8-scss cfe2ef83d29eb6b3f56d991142d5e56e-scss _05b3a1a1aef60a7f51ee7a015550c6b4-scss"\n' +
+                        '    target="_blank" rel="noreferrer">\n' +
+                        '        <div class="bf74505b2b5f10accf0d83dd37daeb24-scss">\n' +
+                        '            <div class="_751cf1d80303de5fb1b5c1bfe1bbf0e0-scss d7a993bbcca121e9c8b5896532ed4b37-scss">\n' +
+                        '                <img src="' + user.avatar_thumb.url_list[0] + '"\n' +
+                        '                alt="" class="_6bae574eea4bc99f3da09b6be51a0a0d-scss">\n' +
+                        '            </div>\n' +
+                        '            <div class="_9cd5c16eebd42e1132481ca22f8e6957-scss">\n' +
+                        '                <p class="d994484ea4c10f434623343dcf40711c-scss">\n' +
+                        '                    <span class="_9b365a9d76cfb9db759d93e586f25133-scss">\n' +
+                        '                        <span>\n' +
+                        '                            <span>\n' +
+                        '                                <span>\n' +
+                        '                                    <span>\n' +
+                        '                                        ' + user.nickname + '\n' +
+                        '                                    </span>\n' +
+                        '                                </span>\n' +
+                        '                            </span>\n' +
+                        '                        </span>\n' +
+                        '                    </span>\n' +
+                        '                </p>\n' +
+                        '                <div class="cb52150e679566f23e730da1be961189-scss">\n' +
+                        '                </div>\n' +
+                        '                <div class="f6dd8dd18e2b6b33d88b0f7373a1df60-scss">\n' +
+                        '                    <p class="_55bde42bc5ce539f82c669a735a38efa-scss">\n' +
+                        '                        ' + user.custom_verify + '\n' +
+                        '                    </p>\n' +
+                        '                </div>\n' +
+                        '            </div>\n' +
+                        '            <button onclick="addPeer(event,'+i+');event.cancelBubble=true;" class="abace09bde29f9d2077ba2a9e9e2b67d-scss _3c25ad295260cb707e35da1ec8d93a51-scss _14339689bca6b9eda19c146a14df625e-scss _355581f80319642ea3b0d4c185648a4d-scss">\n' +
+                        '                加入监控\n' +
+                        '            </button>\n' +
+                        '        </div>\n' +
+                        '        <div class="c3d0a87a4436e68afb8f016ed04da852-scss">\n' +
+                        '            <span>\n' +
+                        '                抖音号:\n' +
+                        '                <span class="">\n' +
+                        '                    ' + user.unique_id + '\n' +
+                        '                </span>\n' +
+                        '            </span>\n' +
+                        '            <span class="_4fb7ff38d473d7dff123662d33343335-scss">\n' +
+                        '            </span>\n' +
+                        '            <span>\n' +
+                        '                ' + user.total_favorited + '获赞\n' +
+                        '            </span>\n' +
+                        '            <span class="_4fb7ff38d473d7dff123662d33343335-scss">\n' +
+                        '            </span>\n' +
+                        '            <span>\n' +
+                        '                ' + user.follower_count + '粉丝\n' +
+                        '            </span>\n' +
+                        '        </div>\n' +
+                        '        <p class="_5d6b581b9e8e9b74a370a758ad50e444-scss">\n' +
+                        '            <span class="_9b365a9d76cfb9db759d93e586f25133-scss">\n' +
+                        '                <span>\n' +
+                        '                    <span>\n' +
+                        '                        <span>\n' +
+                        '                            <span>\n' +
+                        '                                ' + user.signature + '' +
+                        '                            </span>\n' +
+                        '                        </span>\n' +
+                        '                    </span>\n' +
+                        '                </span>\n' +
+                        '            </span>\n' +
+                        '        </p>\n' +
+                        '    </a>\n' +
+                        '</li>');
+                }
+            }
+        }
+
+        function comments(videoId) {
+            okLayer.open('查看评论', '/commentPage/' + videoId, "90%", "90%", null, function () {
+            })
+        }
+        function addWord(words,index) {
+            $.post('{% url "user-addWord" %}',{
+                words:words,
+                index:index,
+            },function (data) {
+                layer.msg(data.msg)
+            });
+        }
+        function addPeer(event,index) {
+            event.stopPropagation();
+            event.preventDefault();
+            alert(index);
+            console.log(peerList[index].user_info);
+            $.post('{% url "user-addPeer" %}',peerList[index].user_info,function () {
+
+            });
+        }
+        function getYMDHMS(timestamp) {
+            var date = new Date(timestamp * 1000);
+            var YY = date.getFullYear() + '-';
+            var MM = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+            var DD = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate());
+            var hh = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+            var mm = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+            var ss = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+            return YY + MM + DD + " " + hh + mm + ss;
+        }
+    </script>
+
+{% endblock body %}

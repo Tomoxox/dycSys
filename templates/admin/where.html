@@ -1,0 +1,85 @@
+{% if seek %}
+    <form class="layui-form layui-form-pane my-search" lay-filter="filter">
+        {% if seek.text %}
+            <div class="my-search-div">
+                <select name="input_type" lay-filter="input_type">
+                    <option value="">请选择条件</option>
+                    {% for kv in seek.text %}
+                        <option value="{{ kv.field }}"
+                                {% if kv.value %}
+                                name="{{ kv.field }}" value="{{ kv.value }}"
+                                        selected
+                                {% endif %}>
+                        {{ kv.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="my-search-div">
+                <input class="layui-input my-search-input" name="input_text" value=""/>
+            </div>
+        {% endif %}
+{#        {if isset($seek['time']) AND is_array($seek['time']) AND !empty($seek['time'])}#}
+{#        <div class="my-search-div">#}
+{#            <select name="time_type" lay-filter="time_type">#}
+{#                <option value="">请选择日期</option>#}
+{#                {volist name='$seek.time' id='vo'}#}
+{#                <option value="{$vo.field}" {if isset($vo.value)}{eq name="$vo.field" value="$vo.value" }selected{#}
+{#                /eq}{/if}>{$vo.title}</option>#}
+{#                {/volist}#}
+{#            </select>#}
+{#        </div>#}
+{#        <div class="my-search-div">#}
+{#            <input class="layui-input my-search-input" placeholder="开始日期" autocomplete="off" id="startTime"#}
+{#                   name="time_start"/>#}
+{#        </div>#}
+{#        <div class="my-search-div">#}
+{#            <input class="layui-input my-search-input" placeholder="结束日期" autocomplete="off" id="endTime"#}
+{#                   name="time_end"/>#}
+{#        </div>#}
+{#        {/if}#}
+{#        {if isset($seek['area']) AND is_array($seek['area']) AND !empty($seek['area'])}#}
+{#        <div class="my-search-div">#}
+{#            <select name="area_type" lay-filter="area_type">#}
+{#                <option value="">请选择范围</option>#}
+{#                {volist name='$seek.area' id='vo'}#}
+{#                <option value="{$vo.field}" {if isset($vo.value)}{eq name="$vo.field" value="$vo.value" }selected{#}
+{#                /eq}{/if}>{$vo.title}</option>#}
+{#                {/volist}#}
+{#            </select>#}
+{#        </div>#}
+{#        <div class="my-search-div">#}
+{#            <input class="layui-input my-search-input" placeholder="开始范围" autocomplete="off" name="area_start"/>#}
+{#        </div>#}
+{#        <div class="my-search-div">#}
+{#            <input class="layui-input my-search-input" placeholder="结束范围" autocomplete="off" name="area_end"/>#}
+{#        </div>#}
+{#        {/if}#}
+{#        {if isset($seek['down']) AND is_array($seek['down']) AND !empty($seek['down'])}#}
+{#        {volist name='$seek.down' id='vo'}#}
+{#        <div class="my-search-div">#}
+{#            <select id="{$vo.marks|default=''}" name="{$vo.field}" lay-filter="{$vo.marks|default=''}">#}
+{#                {if isset($vo['title']) AND !empty($vo['title'])}#}
+{#                <option value="">{$vo.title}</option>#}
+{#                {/if}#}
+{#                {if isset($vo['whole']) AND !empty($vo['whole'])}#}
+{#                {foreach $vo.whole as $k => $v}#}
+{#                <option value="{$k}" {if isset($vo.value)}{eq name="$k" value="$vo.value" }selected{#}
+{#                /eq}{/if}>{$v}</option>#}
+{#                {/foreach}#}
+{#                {/if}#}
+{#            </select>#}
+{#        </div>#}
+{#        {/volist}#}
+{#        {/if}#}
+        <div class="my-search-div">
+            <button class="layui-btn" lay-submit="" lay-filter="search">搜 索</button>
+        </div>
+    </form>
+    <script>
+    layui.use('form', function(){
+  var form = layui.form;
+
+});
+    </script>
+{% endif %}
