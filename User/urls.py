@@ -35,6 +35,7 @@ urlpatterns = [
 
     path('douyinHot', user_login_required(views.douyinHot),name='user-douyinHot'),
     path('peerMonitor', user_login_required(views.peerMonitor),name='user-peerMonitor'),
+    path('deletePeer', user_login_required(views.deletePeer),name='user-deletePeer'),
     path('videoMonitor', user_login_required(views.videoMonitor),name='user-videoMonitor'),
     path('taskCenter', user_login_required(views.taskCenter),name='user-taskCenter'),
     path('marketingClue', user_login_required(views.marketingClue),name='user-marketingClue'),

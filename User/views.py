@@ -346,6 +346,15 @@ def peerMonitor(request):
     return render(request, 'user/monitor/peerMonitor.html', locals())
 
 
+@require_POST
+def deleteMyHotWord(request):
+    id = request.POST.get('idsStr')
+    customer = request.session['customer']
+    peer = Peer.objects.filter(id=id, Customer_id=customer['id']).get()
+    if peer:
+        peer.delete()
+    return AjaxReturn(1, '删除成功')
+
 def videoMonitor(request):
     if request.method == 'POST':
         curr = int(request.POST.get('curr', 1))

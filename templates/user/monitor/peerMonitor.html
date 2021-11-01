@@ -150,7 +150,7 @@
 
 		function deleteById(id) {
 			okLayer.confirm("确定要删除吗？", function () {
-				okUtils.ajax("/product/deleteProduct", "delete", {idsStr: id}).done(function (response) {
+				okUtils.ajax("/deletePeer", "post", {idsStr: id}).done(function (response) {
 					okUtils.tableSuccessMsg(response.msg);
 				}).fail(function (error) {
 					console.log(error);
