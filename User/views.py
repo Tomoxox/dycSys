@@ -239,10 +239,10 @@ def myHotWord(request):
         input_text = request.POST.get('input_text')
         if input_type and len(input_type) > 0 and input_text and len(input_text) > 0:
             dic[input_type] = input_text
-        curr = int(request.POST.get('curr', 1))
-        nums = int(request.POST.get('nums', 20))
+        page = int(request.POST.get('page', 1))
+        limit = int(request.POST.get('limit', 20))
         count = MyHotWord.objects.filter(**dic).count()
-        data = MyHotWord.objects.filter(**dic).all()[curr - 1: nums]
+        data = MyHotWord.objects.filter(**dic).all()[(page - 1)*limit: page * limit]
         data = list(data.values())
         if hasattr(MyHotWord, 'formatData'):
             data = getattr(MyHotWord, 'formatData')(data)
@@ -357,10 +357,10 @@ def deletePeer(request):
 
 def videoMonitor(request):
     if request.method == 'POST':
-        curr = int(request.POST.get('curr', 1))
-        nums = int(request.POST.get('nums', 20))
+        page = int(request.POST.get('page', 1))
+        limit = int(request.POST.get('limit', 20))
         count = Video.objects.filter(Customer_id=request.session.get('customer')['id']).count()
-        data = Video.objects.filter(Customer_id=request.session.get('customer')['id']).all()[curr - 1: nums]
+        data = Video.objects.filter(Customer_id=request.session.get('customer')['id']).all()[(page - 1)*limit: page * limit]
         data = list(data.values())
         if hasattr(Video, 'formatData'):
             data = getattr(Video, 'formatData')(data)
@@ -375,7 +375,7 @@ def taskCenter(request):
         taskArr.append({
             'task': task,
             'video': task.video_set.count(),
-            'comment': task.comment_set.count(),
+            'comment': task.comment_set.filter(is_ai=False).count(),
         })
     return render(request, 'user/monitor/taskCenter.html', locals())
 
@@ -384,7 +384,7 @@ def marketingClue(request):
     if request.method == 'POST':
         dic = {
             'Customer_id': request.session.get('customer')['id'],
-            'Video__isnull': False,
+            # 'Video__isnull': False,
             'is_ai': False
         }
         task = request.POST.get('task')
@@ -420,7 +420,7 @@ def aiClue(request):
     if request.method == 'POST':
         dic = {
             'Customer_id' : request.session.get('customer')['id'],
-            'PeerVideo__isnull' : False,
+            # 'PeerVideo__isnull' : False,
             'is_ai' : True
         }
         task = request.POST.get('task')
@@ -549,10 +549,10 @@ def loginLogging(request):
         dic = {
             'Customer_id': request.session.get('customer')['id']
         }
-        curr = int(request.POST.get('curr', 1))
-        nums = int(request.POST.get('nums', 20))
+        page = int(request.POST.get('page', 1))
+        limit = int(request.POST.get('limit', 20))
         count = CustomerLoginLogging.objects.filter(**dic).count()
-        data = CustomerLoginLogging.objects.filter(**dic).all()[curr - 1: nums]
+        data = CustomerLoginLogging.objects.filter(**dic).all()[(page - 1)*limit: page * limit]
         data = list(data.values())
         if hasattr(CustomerLoginLogging, 'formatData'):
             data = getattr(CustomerLoginLogging, 'formatData')(data)

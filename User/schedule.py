@@ -61,7 +61,7 @@ def taskBegin(task):
                                     # 保存评论
                                     saveComment(comm, task.Customer_id, task.id, video.id, hit)
                                 # 保存赞超过10的
-                                elif comm['digg_count'] >= 10:
+                                elif comm['digg_count'] >= 50:
                                     if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit, is_ai=1)
 
@@ -88,7 +88,7 @@ def taskBegin(task):
                                     if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit)
                                 # 保存赞超过10的
-                                elif comm['digg_count'] >= 10:
+                                elif comm['digg_count'] >= 50:
                                     if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit, is_ai=1)
 

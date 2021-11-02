@@ -22,7 +22,7 @@
              style="z-index: 19891026; background-color: rgb(0, 0, 0); opacity: 0.8;"></div>
         <div class="layui-layer1 layui-layer-page" style="z-index: 19891027; width: 500px; position: fixed;">
             <div class="layui-layer-content">
-                <div style="padding: 50px; line-height: 22px; background-color: #668bf9; color: #fff; font-weight: 300;">
+                <div style="padding: 50px; line-height: 22px; background-color: #668bf9; color: #fff; font-weight: 300;max-height: 400px;overflow: scroll;">
                     <h1>请选择任务</h1>
                     {% for task in tasks %}
                         <div class="seperator layui-anim " data-task-id="{{ task.id }}">{{ task.title }}</div>
