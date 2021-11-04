@@ -1,0 +1,382 @@
+{% extends "../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        @font-face {
+            font-family: 'LcdD';
+            src: url("{% static 'lib/fonts/LcdD.ttf' %}");
+        }
+        body{
+            background-color: #1e9fff;
+        }
+        .padding10 {
+            padding: 10px;
+        }
+
+        .truckHomeDataIndex[data-v-ff887ad4] {
+            max-width: 100vw;
+            max-height: 100vh;
+            background-color: #1e9fff;
+            margin: 0 auto;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .top-header[data-v-9c559240] {
+            margin-bottom: 2.777777777777778vh;
+        }
+
+        .igs-flex.igs-flex11 {
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+        }
+
+        .top_bg_img[data-v-9c559240] {
+            height: 4.907407407407407vh;
+            width: 100%;
+            max-width: 100vw;
+            background: url("{% static 'images/top_03.png' %}") no-repeat;
+            background-size: 100%;
+            overflow: hidden;
+        }
+
+        .day_time[data-v-9c559240] {
+            position: absolute;
+            top: 4.166666666666666vh;
+            color: #fff;
+            left: 50%;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%);
+            font-size: 1.111111111111111vh;
+        }
+
+        .truckHomeDataIndex .main-content[data-v-ff887ad4] {
+            width: 100%;
+            -webkit-box-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+        }
+
+        .current[data-v-20d44e8a] {
+            text-align: center;
+            width: 100%;
+            height: 16.666666666666664vh;
+            color: #97a8f7;
+            background: url("{% static 'images/2_icon.png' %}") no-repeat;
+            background-size: 100% 100%;
+            padding: 4.351851851851852vh .78125vw 1.388888888888889vh .78125vw;
+            position: relative;
+            float: right;
+            margin-top: 10px;
+        }
+
+        .current .current_cont[data-v-20d44e8a] {
+            padding-top: 1.388888888888889vh;
+            height: 100%;
+        }
+
+        .current .current_cont .cont[data-v-20d44e8a] {
+            height: 100%;
+            padding: 0 1.302083333333333vw;
+        }
+
+        .current .current_cont .cont p[data-v-20d44e8a] {
+            text-align: left;
+            font-size: 16px;
+            font-family: Source Han Sans CN;
+            font-weight: 700;
+            color: #fff;
+            line-height: 3.703703703703703vh;
+        }
+
+        .flex-start[data-v-1fb199ae] {
+            -webkit-box-pack: start !important;
+            -ms-flex-pack: start !important;
+            justify-content: flex-start !important;
+        }
+
+        .white-color[data-v-1fb199ae] {
+            color: #fff;
+        }
+
+        .box-item[data-v-1fb199ae] {
+            width: auto;
+            height: 3.703703703703703vh;
+            list-style: none;
+            -webkit-writing-mode: vertical-lr;
+            -ms-writing-mode: tb-lr;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            padding: 0 .416666666666667vw 0 0;
+            font-size: 1.875vw;
+            font-family: LcdD;
+            font-weight: 700;
+            margin: 0 0 0 -.208333333333333vw;
+            color: #fff;
+        }
+
+        .wrapers[data-v-1fb199ae] {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-flex: 1;
+            -ms-flex: 1;
+            flex: 1;
+            height: auto;
+            line-height: 3.703703703703703vh;
+            border: none !important;
+            padding: 0;
+            margin: 0;
+            -webkit-box-pack: center;
+            -ms-flex-pack: center;
+            justify-content: center;
+            background: transparent;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 30px;
+            color: white;
+            {#font-size: 1.875vw;#}
+            font-family: LcdD;
+        }
+
+        .map {
+            padding: 20px;
+            height: 600px;
+            background: url("{% static 'images/4_icon.png' %}") no-repeat;
+            background-size: 100% 100%;
+        }
+
+        .chart1 {
+            background: url("{% static 'images/7_icon.png' %}") no-repeat;
+            background-size: 100% 100%;
+            margin-left: 2%;
+            width: 98%;
+        }
+
+        .chart2 {
+            background: url("{% static 'images/3_icon.png' %}") no-repeat;
+            background-size: 100% 100%;
+            margin-left: 2%;
+            width: 98%;
+            margin-top: 10px;
+            height: 380px;
+        }
+
+        #main {
+            height: 250px;
+            width: 100%;
+        }
+
+        #main2 {
+            width: 100%;
+            padding: 40px 5% 0 5%;
+        }
+
+        #main2 .table-header {
+            font-size: .78125vw;
+            color: #3a5cc0;
+            text-align: center;
+        }
+
+        #main2 .table-content {
+            font-size: .78125vw;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        #main2 .index-c {
+            background-color: #007eff;
+            padding: 3px 6px;
+        }
+
+        #main2 .second-c {
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        #main2 .fourth-c a{
+            color: orange;
+        }
+    </style>
+    <div data-v-ff887ad4="" class="truckHomeDataIndex igs-flex igs-flex11 avue-view">
+{#        <div data-v-9c559240="" data-v-ff887ad4="" class="top-header">#}
+{#            <div data-v-ff887ad4="" data-v-9c559240="" class="top_bg_img">#}
+{#            </div>#}
+{#            <div data-v-9c559240="" class="day_time">#}
+{#                {{ now | date:'Y-m-d H:i:s'}}#}
+{#            </div>#}
+{#        </div>#}
+
+        <div data-v-ff887ad4="" class="main-content clearfix">
+            <div class="layui-row">
+                <div data-v-20d44e8a="" data-v-ff887ad4="" class="current layui-col-md12">
+                    <div data-v-20d44e8a="" class="current_cont igs-flex igs-flex4 layui-row">
+
+                        {% for dic in dict %}
+                        <div class="layui-col-xs2 padding10">
+                            <div data-v-20d44e8a="" class="cont">
+                                <p data-v-20d44e8a="">
+                                    {{ dic.title }}
+                                </p>
+                                <div data-v-1fb199ae="" data-v-20d44e8a="" class="wrapers flex-start">
+                                    {{ dic.num }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+            <div class="layui-row" style="margin-top: 20px;">
+                <div class="layui-col-md6">
+                    <div class="map-div">
+                        <div class="map" id="chinaChart2"></div>
+                    </div>
+                </div>
+                <div class="layui-col-md6">
+                    <div class="layui-row">
+                        <div class="layui-col-md12">
+                            <div class="chart1">
+                                <div id="main"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-row">
+                        <div class="layui-col-md12">
+                            <div class="chart2">
+                                <div id="main2">
+                                    <div style="width: 90%;">
+                                        <div class="layui-row table-header">
+                                            <div class="layui-col-sm4">询盘时间</div>
+                                            <div class="layui-col-sm5">详细</div>
+                                            <div class="layui-col-sm2">-</div>
+                                            <div class="layui-col-sm1">操作</div>
+                                        </div>
+                                        <div id="comment-div">
+                                            {% for comm in commentList %}
+                                            <div class="layui-row table-content">
+                                                <div class="layui-col-sm4"><span
+                                                        class="index-c">{{ comm.created_at | date:'Y-m-d H:i:s' }}</span></div>
+                                                <div class="layui-col-sm5 second-c">{{ comm.text }}</div>
+                                                <div class="layui-col-sm2 third-c">{{ comm.hit_word | default:'-' }}</div>
+                                                <div class="layui-col-sm1 fourth-c">
+                                                    <a href="/marketingClue"><i class="layui-icon">&#xe609;</i></a>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="{% static 'lib/echarts/echarts.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'lib/echarts/world/js/china.js' %}"></script>
+    <script>
+        layui.use(["okUtils"], function () {
+            let $ = layui.jquery;
+            let okUtils = layui.okUtils;
+            $('html').css('height', '100%');
+            $('body').css('height', '100%');
+            $('.ok-body').css('padding', '0');
+            okLoading.close();
+            console.log('xxxx');
+
+            let chinaChartOption = {
+                "title": {"text": "用户所在地", "subtext": "", "x": "center"},
+                {#"tooltip": {"trigger": "item"},#}
+                "visualMap": {
+                    "show": true,
+                    "min": 0,
+                    "max": 1,
+                    "left": 10,
+                    "top": "center",
+                    "orient": "vertical",
+                    "text": ["高", "低"],
+                    "realtime": false,
+                    "calculable": true,
+                    "inRange": {"color": ["#E0FFFF", "#BEEFEC", "#6cd2d2", "#6CC8C1",]}
+                },
+                "series": [
+                    {
+                        "name": "用户所在地",
+                        "roam": false,
+                        "type": "map",
+                        "mapType": "china",
+                        "data": [],
+                        "itemStyle": {
+                            "normal": {"areaColor": "rgba(0,0,0,0)", "borderColor": "#fff", "borderWidth": 1},
+                            "emphasis": {
+                                "areaColor": "rgba(63,177,227)",
+                                "borderColor": "#17ff00",
+                                "borderWidth": 1
+                            }
+                        },
+                        {#"label": {"normal": {"textStyle": {"color": "#fff"}}, "emphasis": {"textStyle": {"color": "#fff"}}}#}
+                        label: {
+                            normal: {"show": true, "textStyle": {"color": "#fff"}},
+                            emphasis: {"show": true, "textStyle": {"color": "#fff"}}
+                        },
+                    }
+                ]
+            };
+
+            /**
+             * 图表2
+             */
+            function chinaChart2() {
+                chinaChartOption.visualMap.show = false;
+                let chinaChart2 = echarts.init($('#chinaChart2')[0]);
+                chinaChart2.setOption(chinaChartOption);
+                okUtils.echartsResize([chinaChart2]);
+            }
+
+            chinaChart2();
+
+            var myChart = echarts.init(document.getElementById('main'));
+
+            // 指定图表的配置项和数据
+            var option = {
+                title: {
+                    text: ''
+                },
+                tooltip: {},
+                legend: {
+                    data: ['']
+                },
+                xAxis: {
+                    data: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"]
+                },
+                yAxis: {},
+                series: [{
+                    name: '',
+                    type: 'bar',
+                    data: []
+                },]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart.setOption(option);
+            window.addEventListener("resize", function () {
+                myChart.resize();
+            });
+        });
+    </script>
+
+{% endblock body %}

@@ -77,9 +77,6 @@
     </div>
     <script type="text/javascript" src="{% static 'js/qrcode.min.js' %}"></script>
     <script>
-        $(function () {
-            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 250 + 'px');
-        });
         layui.use(["table", "form", "laydate", "okLayer", "okUtils"], function () {
             let table = layui.table;
             let form = layui.form;
@@ -191,7 +188,7 @@
                     layer.close(index);
                     let idsStr = okUtils.tableBatchCheck(table);
                     if (idsStr) {
-                        okUtils.ajax("/product/deleteProduct", "delete", {idsStr: idsStr}, true).done(function (response) {
+                        okUtils.ajax("/deleteClue", "post", {idsStr: idsStr}, true).done(function (response) {
                             okUtils.tableSuccessMsg(response.msg);
                         }).fail(function (error) {
                             console.log(error);
@@ -228,6 +225,7 @@
         }
 
         function showQRCode(uid,id) {
+            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 150 + 'px');
             $('#qrcode').empty();
             var qrcode = new QRCode(document.getElementById("qrcode"), {
                 width: 200,
@@ -243,7 +241,7 @@
     <script type="text/html" id="toolbarTpl">
         <div class="layui-btn-container">
             <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="batchEnabled">加入客户档案</button>
-            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="batchDel">批量删除</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="batchDelete">批量删除</button>
         </div>
     </script>
     <!-- 行工具栏模板 -->

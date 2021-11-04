@@ -420,7 +420,7 @@ def aiClue(request):
     if request.method == 'POST':
         dic = {
             'Customer_id' : request.session.get('customer')['id'],
-            # 'PeerVideo__isnull' : False,
+            'PeerVideo__isnull' : False,
             'is_ai' : True
         }
         task = request.POST.get('task')
@@ -503,12 +503,22 @@ def followUpRec(request):
 def addConsumers(request):
     customerId = request.session.get('customer')['id']
     arr = request.POST.get('idsStr','')[0:-1].split(',')
-    commArr = Comment.objects.filter(pk__in=arr).all()
+    commArr = Comment.objects.filter(pk__in=arr,Customer_id=customerId).all()
     if len(commArr) > 0:
         for comm in commArr:
             consumer = Consumer(Customer_id=customerId,uid=comm.uid,sec_uid=comm.sec_uid,nickname=comm.nickname,avatar_thumb=comm.avatar_thumb,phone=comm.phone)
             consumer.save()
     return AjaxReturn(1,'添加成功')
+
+@require_POST
+def deleteClue(request):
+    customerId = request.session.get('customer')['id']
+    arr = request.POST.get('idsStr','')[0:-1].split(',')
+    commArr = Comment.objects.filter(pk__in=arr,Customer_id=customerId).all()
+    if len(commArr) > 0:
+        for comm in commArr:
+            comm.delete()
+    return AjaxReturn(1,'删除成功')
 
 '''
 ------------------------------------------个人中心------------------------------------------------------------

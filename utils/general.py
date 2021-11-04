@@ -7,7 +7,7 @@ def admin_login_required(view_func):
     '''登录判断装饰器'''
 
     def wrapper(request, *view_args, **view_kwargs):
-        if request.session.has_key('adminId'):
+        if request.session.has_key('delegateId'):
             # 用户已登录
             return view_func(request, *view_args, **view_kwargs)
         else:
@@ -42,6 +42,6 @@ def AjaxReturn(code, msg, data=(), count=False):
 
 
 def randomCode(onlyNum=True):
-    str = '0123456789ABCDEFGHJKLMNPQRSTUVWXY'
-    end = 9 if onlyNum else 32
+    str = '0123456789ABCDEFGHJKLMNPQRTUVWXY'
+    end = 9 if onlyNum else 31
     return str[randint(0, end)] + str[randint(0, end)] + str[randint(0, end)] + str[randint(0, end)]

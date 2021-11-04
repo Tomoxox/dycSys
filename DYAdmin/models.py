@@ -13,6 +13,10 @@ COMMENT_STATUS = {
     0: "未处理",
     1: "已处理",
 }
+TASK_STATUS = {
+    0: "停止",
+    1: "运行",
+}
 
 
 class BaseManager(models.Manager):
@@ -189,13 +193,6 @@ class Delegate(BaseModel):
                 'align': 'center'
             },
             {
-                'field': 'available_till',
-                'title': '有效期',
-                'width': 150,
-                'minWidth': 150,
-                'align': 'center'
-            },
-            {
                 'field': 'comment_num_left',
                 'title': '剩余评论数',
                 'width': 100,
@@ -276,14 +273,6 @@ class Delegate(BaseModel):
                 'quick': ACCOUNT_STATUS
             },
             {
-                'field': 'available_till',
-                'title': '有效期',
-                'types': 'datetime',
-                'class': 'text',
-                'warns': '请填写有效期',
-                'musts': 'required'
-            },
-            {
                 'field': 'remark',
                 'title': '备注',
                 'types': 'input',
@@ -307,11 +296,12 @@ class Delegate(BaseModel):
         return param
 
     @staticmethod
-    def other(id,param):
+    def other(id,request):
         try:
             with transaction.atomic():
+                num = abs(int(request.POST.dict().get('number')))
                 dele = Delegate.objects.filter(id=id).get()
-                dele.comment_num_left += int(param.get('number'))
+                dele.comment_num_left += num
                 dele.save()
                 return AjaxReturn(1, '增加成功')
         except DatabaseError:
@@ -337,7 +327,8 @@ class Customer(BaseModel):
     def seek():
         return {
             'text': [
-                {'field': 'id', 'title': '编号'},
+                {'field': 'name', 'title': '姓名'},
+                {'field': 'phone', 'title': '手机号'},
             ],
         }
 
@@ -352,15 +343,15 @@ class Customer(BaseModel):
                 'align': 'center'
             },
             {
-                'field': 'id',
-                'title': '编号',
-                'width': 80,
-                'minWidth': 80,
+                'field': 'delegate',
+                'title': '代理',
+                'width': 150,
+                'minWidth': 150,
                 'align': 'center'
             },
             {
                 'field': 'phone',
-                'title': '编号',
+                'title': '手机号',
                 'width': 150,
                 'minWidth': 150,
                 'align': 'center'
@@ -426,11 +417,11 @@ class Customer(BaseModel):
 
     @staticmethod
     def hand():
-        return tableMenus('Delegate', ('other', 'updateData', 'deleteData'))
+        return tableMenus('Customer', ('other', 'updateData', 'deleteData'))
 
     @staticmethod
     def menus():
-        return tableMenus('Delegate', ('addData', 'batchMove'))
+        return tableMenus('Customer', ('batchMove'))
 
     @staticmethod
     def field(param={}):
@@ -457,7 +448,7 @@ class Customer(BaseModel):
                 'types': 'input',
                 'class': 'text',
                 'warns': '请填写名字',
-                'musts': 'required'
+                'musts': 'nothing'
             },
             {
                 'field': 'status',
@@ -478,8 +469,13 @@ class Customer(BaseModel):
 
     @staticmethod
     def formatData(data=[]):
+        delePhone = None
         for d in data:
+            if not delePhone:
+                self = Customer.objects.filter(id=d['id']).get()
+                delePhone = self.Delegate.phone
             d['status'] = ACCOUNT_STATUS[d['status']]
+            d['delegate'] = delePhone
         return data
 
     @staticmethod
@@ -490,12 +486,22 @@ class Customer(BaseModel):
         return param
 
     @staticmethod
-    def other(id, param):
+    def other(id, request):
         try:
             with transaction.atomic():
-                dele = Delegate.objects.filter(id=id).get()
-                dele.comment_num_left += int(param.get('number'))
-                dele.save()
+                num = abs(int(request.POST.dict().get('number')))
+                cus = Customer.objects.filter(id=id).get()
+                if request.session.get('delegateId') != 0:
+                    dele = cus.Delegate
+                    # 检查代理剩余
+                    if dele.comment_num_left < num:
+                        return AjaxReturn(0, '代理剩余线索数量不足')
+                    # 扣除
+                    dele.comment_num_left -= num
+                    dele.save()
+                # 增加
+                cus.comment_num_left += num
+                cus.save()
                 return AjaxReturn(1, '增加成功')
         except DatabaseError:
             return AjaxReturn(0, '操作失败，请重试')
@@ -513,6 +519,13 @@ class CustomerLoginLogging(BaseModel):
         for d in data:
             d['method'] = '账号密码登录'
         return data
+
+class Config(BaseModel):
+    video_num = models.IntegerField(default=30)
+    task_num = models.IntegerField(default=3)
+    peer_num = models.IntegerField(default=5)
+    objects = BaseManager()
+
 
 # --------------------------------------------------------------------------------
 class MyHotWord(BaseModel):
@@ -536,6 +549,127 @@ class Task(BaseModel):
     status = models.SmallIntegerField(null=True,default=1)
     remark = models.CharField(max_length=255,null=True)
     objects = BaseManager()
+
+    @staticmethod
+    def seek():
+        return {
+            'text': [
+                {'field': 'title', 'title': '任务名称'},
+            ],
+        }
+
+    @staticmethod
+    def head():
+        return [
+            {
+                'width': 50,
+                'minWidth': 50,
+                'type': 'checkbox',
+                'fixed': 'left',
+                'align': 'center'
+            },
+            {
+                'field': 'title',
+                'title': '任务名',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+            {
+                'field': 'filter_words',
+                'title': '目标词',
+                'width': 300,
+                'minWidth': 300,
+                'align': 'center'
+            },
+            {
+                'field': 'status',
+                'title': '任务状态',
+                'width': 100,
+                'minWidth': 100,
+                'align': 'center'
+            },
+            {
+                'field': 'remark',
+                'title': '备注',
+                'width': 150,
+                'minWidth': 150,
+                'align': 'center'
+            },
+            {
+                'field': 'created_at',
+                'title': '创建日期',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+            {
+                'field': 'updated_at',
+                'title': '更新日期',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+        ]
+
+    @staticmethod
+    def hand():
+        return tableMenus('Customer', ())
+
+    @staticmethod
+    def menus():
+        return tableMenus('Customer', ())
+
+    @staticmethod
+    def field(param={}):
+        return [
+            {
+                'field': 'phone',
+                'title': '手机账号',
+                'types': 'input',
+                'class': 'text',
+                'warns': '请填写登录手机号',
+                'musts': 'required'
+            },
+            {
+                'field': 'password',
+                'title': '密码',
+                'types': 'input',
+                'class': 'password',
+                'warns': '编辑可不填写密码',
+                'musts': 'nothing' if len(param) else 'required'
+            },
+            {
+                'field': 'name',
+                'title': '名字',
+                'types': 'input',
+                'class': 'text',
+                'warns': '请填写名字',
+                'musts': 'nothing'
+            },
+            {
+                'field': 'status',
+                'title': '运行状态',
+                'types': 'select',
+                'warns': '请选择账号状态',
+                'quick': TASK_STATUS
+            },
+            {
+                'field': 'available_till',
+                'title': '有效期',
+                'types': 'datetime',
+                'class': 'text',
+                'warns': '请填写有效期',
+                'musts': 'required'
+            },
+        ]
+
+    @staticmethod
+    def formatData(data=[]):
+        for d in data:
+            d['status'] = TASK_STATUS[d['status']]
+        return data
+
 
 class Peer(BaseModel):
     Customer = models.ForeignKey('Customer', on_delete=models.CASCADE)
@@ -633,9 +767,78 @@ class Consumer(BaseModel):
     objects = BaseManager()
 
     @staticmethod
+    def seek():
+        return {
+            'text': [
+                {'field': 'title', 'title': '客户昵称'},
+            ],
+        }
+
+    @staticmethod
+    def head():
+        return [
+            {
+                'width': 50,
+                'minWidth': 50,
+                'type': 'checkbox',
+                'fixed': 'left',
+                'align': 'center'
+            },
+            {
+                'field': 'nickname',
+                'title': '昵称',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+            {
+                'field': 'name',
+                'title': '姓名',
+                'width': 300,
+                'minWidth': 300,
+                'align': 'center'
+            },
+            {
+                'field': 'phone',
+                'title': '电话',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+            {
+                'field': 'remark',
+                'title': '备注',
+                'width': 150,
+                'minWidth': 150,
+                'align': 'center'
+            },
+            {
+                'field': 'created_at',
+                'title': '创建日期',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+            {
+                'field': 'updated_at',
+                'title': '更新日期',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+        ]
+
+    @staticmethod
+    def hand():
+        return tableMenus('Customer', ())
+
+    @staticmethod
+    def menus():
+        return tableMenus('Customer', ())
+
+    @staticmethod
     def formatData(data=[]):
-        for d in data:
-            d['status'] = '关注中'
+
         return data
 
 class FollowUp(BaseModel):

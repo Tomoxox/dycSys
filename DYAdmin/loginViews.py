@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from captcha.image import ImageCaptcha
 from utils.general import AjaxReturn,randomCode
-from .models import AdminAccount
+from .models import Delegate
 
 def login(request):
     if request.method == 'POST':
@@ -11,18 +11,23 @@ def login(request):
             return AjaxReturn(0,'验证码错误')
         username = request.POST.get('user')
         password = request.POST.get('pass')
-        # 超级管理员 adminId：0  代理 adminId：代理ID
-        admin = AdminAccount.objects.filter(username=username,password=password)
-        # print(admin)
-        if len(admin) > 0:
-            admin = admin[0]
-        if admin:
-            request.session['adminId'] = admin.id
-            return AjaxReturn(1,'登录成功')
+        # 超级管理员 delegateId：0  代理 delegateId：代理ID
+        if username == 'chuangding8899' and password == 'cdingchina888':
+            request.session['delegateId'] = 0
+            return AjaxReturn(1, '登录成功')
+
+        dele = Delegate.objects.filter(phone=username,password=password).get()
+        if dele:
+            if dele.status == 1:
+                request.session['delegateId'] = dele.id
+                return AjaxReturn(1,'登录成功')
+            else:
+                return AjaxReturn(0, '账号已失效')
         else:
             del request.session['captcha']
             return AjaxReturn(0, '账号或密码错误')
-    if request.session.get('adminId'):
+
+    if request.session.get('delegateId'):
         return redirect('dyadmin-index')
     return render(request,'admin/login.html')
 

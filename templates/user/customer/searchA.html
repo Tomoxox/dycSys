@@ -127,7 +127,6 @@
         };
         $(function () {
             okLoading.close();
-            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 250 + 'px');
             $('.seperator').click(function () {
                 var taskId = $(this).attr('data-task-id');
                 var selected = $(this).hasClass('selected-now');
@@ -405,6 +404,7 @@
         }
 
         function addVideo(index) {
+            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 250 + 'px');
             $('.task-selections').show();
             videoData = videoList[index].aweme_info;
         }

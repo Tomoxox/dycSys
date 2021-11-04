@@ -129,6 +129,7 @@ import numpy as np
 from selenium import webdriver
 from urllib.parse import urlparse
 from selenium.webdriver import ActionChains
+from random import randint
 
 class Slide(object):
 
@@ -143,9 +144,10 @@ class Slide(object):
 
         bg_resize = bg_size if bg_size else (340, 212)
         gap_size = gap_size if gap_size else (68, 68)
-        self.bg = self.check_is_img_path(bg, 'bg', resize=bg_resize)
-        self.gap = self.check_is_img_path(gap, 'gap', resize=gap_size)
-        self.out = out if out else os.path.join(self.img_dir, 'out.jpg')
+        dateStr = time.strftime("%Y%m%d%H%M%S", time.localtime())+str(randint(10,99))
+        self.bg = self.check_is_img_path(bg, 'bg'+dateStr, resize=bg_resize)
+        self.gap = self.check_is_img_path(gap, 'gap'+dateStr, resize=gap_size)
+        self.out = out if out else os.path.join(self.img_dir, 'out'+dateStr+'.jpg')
 
     @staticmethod
     def check_is_img_path(img, img_type, resize):

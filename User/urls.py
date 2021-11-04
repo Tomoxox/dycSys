@@ -41,6 +41,7 @@ urlpatterns = [
     path('marketingClue', user_login_required(views.marketingClue),name='user-marketingClue'),
 
     path('updateStatusOfClue', user_login_required(views.updateStatusOfClue), name='user-updateSatusOfClue'),
+    path('deleteClue', user_login_required(views.deleteClue), name='user-deleteClue'),
 
     path('aiClue', user_login_required(views.aiClue),name='user-aiClue'),
     path('addConsumers', user_login_required(views.addConsumers),name='user-addConsumers'),

@@ -1,0 +1,57 @@
+{% extends "../../base.html" %}
+{% load static %}
+{% block body %}
+    <style>
+        .padding20 {
+            padding: 20px;
+        }
+    </style>
+    <form class="layui-form padding20" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">关注视频上限</label>
+            <div class="layui-input-block">
+                <input type="text" name="video" required lay-verify="required" placeholder="请输入关注视频上限"
+                       autocomplete="off" class="layui-input" value="{{ conf.video_num }}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">创建任务上限</label>
+            <div class="layui-input-block">
+                <input type="text" name="task" required lay-verify="required" placeholder="请输入任务上限"
+                       autocomplete="off" class="layui-input" value="{{ conf.task_num }}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">关注达人上限</label>
+            <div class="layui-input-block">
+                <input type="text" name="peer" required lay-verify="required" placeholder="请确认达人上限"
+                       autocomplete="off" class="layui-input" value="{{ conf.peer_num }}">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="formDemo">立即提交</button>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        $(function () {
+            okLoading.close();
+        })
+        layui.use(['form','layer'], function () {
+            var form = layui.form;
+            var layer = layui.layer;
+            form.on('submit(formDemo)', function (data) {
+                $.post('',data.field,function (res) {
+                    layer.msg(res.msg);
+                    if (res.code == 1){
+                        alert(res.msg);
+                        window.location.href = window.location.href;
+                    }
+                });
+                return false;
+            });
+        });
+    </script>
+{% endblock body %}
