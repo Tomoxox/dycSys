@@ -185,7 +185,7 @@ def table(request, model):
         curr = int(request.POST.get('curr'))
         nums = int(request.POST.get('nums'))
         count = model.objects.filter(**dic).count()
-        data = model.objects.filter(**dic).all()[curr-1: nums]
+        data = model.objects.filter(**dic).all()[(curr-1)*nums: curr*nums]
         data = list(data.values())
         if hasattr(model, 'formatData'):
             data = getattr(model, 'formatData')(data)
