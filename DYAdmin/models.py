@@ -758,7 +758,10 @@ class Comment(BaseModel):
     def formatData(data=[]):
         for d in data:
             d['status'] = COMMENT_STATUS[d['status']]
-            d['TaskTitle'] = Task.objects.filter(id=d['Task_id']).get().title
+            try:
+                d['TaskTitle'] = Task.objects.filter(id=d['Task_id']).get().title
+            except:
+                d['TaskTitle'] = '-'
             if d.get('Video_id'):
                 d['VideoTitle'] = Video.objects.filter(id=d['Video_id']).get().desc
                 d['VideoId'] = Video.objects.filter(id=d['Video_id']).get().aweme_id

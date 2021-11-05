@@ -54,6 +54,8 @@ def home(request):
         customer_left = Customer.objects.filter(id__in=customerArr).aggregate(total=Sum('comment_num_left'))
         if not customer_left['total']:
             customer_left = 0
+        else:
+            customer_left = customer_left['total']
         customers = dele.customer_set.all().count()
 
         dict = [
