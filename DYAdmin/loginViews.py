@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from captcha.image import ImageCaptcha
 from utils.general import AjaxReturn,randomCode
 from .models import Delegate
+import datetime
 
 def login(request):
     if request.method == 'POST':
@@ -20,6 +21,10 @@ def login(request):
         if len(dele) > 0:
             dele = dele[0]
             if dele.status == 1:
+                now = datetime.datetime.now()
+                if now >= dele.available_till:
+                    return AjaxReturn(0, '账号已过期')
+
                 request.session['delegateId'] = dele.id
                 return AjaxReturn(1,'登录成功')
             else:

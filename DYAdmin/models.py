@@ -141,7 +141,7 @@ class Delegate(BaseModel):
     password = models.CharField(max_length=32)
     name = models.CharField(max_length=16, null=True)
     status = models.SmallIntegerField(default=0)
-    available_till = models.DateTimeField(default='', null=True)
+    available_till = models.DateTimeField(null=True)
     comment_num_left = models.IntegerField(default=0, null=True)
     remark = models.CharField(max_length=50, default='', null=True)
     objects = BaseManager()
@@ -197,6 +197,13 @@ class Delegate(BaseModel):
                 'title': '剩余评论数',
                 'width': 100,
                 'minWidth': 100,
+                'align': 'center'
+            },
+            {
+                'field': 'available_till',
+                'title': '有效期',
+                'width': 150,
+                'minWidth': 150,
                 'align': 'center'
             },
             {
@@ -271,6 +278,14 @@ class Delegate(BaseModel):
                 'types': 'select',
                 'warns': '请选择账号状态',
                 'quick': ACCOUNT_STATUS
+            },
+            {
+                'field': 'available_till',
+                'title': '有效期',
+                'types': 'datetime',
+                'class': 'text',
+                'warns': '请填写有效期',
+                'musts': 'required'
             },
             {
                 'field': 'remark',
