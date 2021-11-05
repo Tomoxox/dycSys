@@ -306,7 +306,7 @@ class Delegate(BaseModel):
     @staticmethod
     def checkNewParam(param):
         count = Delegate.objects.filter(phone=param['phone']).count()
-        if count:
+        if count or len(param['phone']) > 11:
             return
         return param
 
