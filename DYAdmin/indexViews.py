@@ -52,7 +52,10 @@ def home(request):
         total_comment = Comment.objects.filter(Customer_id__in=customerArr).all().count()
 
         customer_left = Customer.objects.filter(id__in=customerArr).aggregate(total=Sum('comment_num_left'))
-        customer_left = customer_left.get('total',0) if customer_left else 0
+        if customer_left:
+            customer_left = customer_left['total']
+        else:
+            customer_left = 0
         customers = dele.customer_set.all().count()
 
         dict = [
