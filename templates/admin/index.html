@@ -41,7 +41,7 @@
             <li class="no-line layui-nav-item">
                 <a href="javascript:">
                     <img src="{% static 'images/logo.png' %}" class="layui-nav-img">
-                    管理后台
+                    {{ role }}
                 </a>
                 <dl id="userInfo" class="layui-nav-child">
                     <dd><a href="javascript:void(0)" data-url="{% url 'dyadmin-logout' %}" id="logout">退出登录</a></dd>
@@ -59,7 +59,7 @@
                 <a class="img" title="我的头像">
                     <img src="{% static 'images/logo.png' %}" class="userAvatar">
                 </a>
-                <p>你好！<span class="userName"></span>欢迎登录</p>
+                <p>你好！<span class="userName">{{ role }}</span>,欢迎登录</p>
             </div>
             <!--左侧导航菜单-->
             <ul id="navBar" class="layui-nav okadmin-nav okadmin-bg-20222A layui-nav-tree">

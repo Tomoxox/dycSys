@@ -696,7 +696,7 @@ class Video(BaseModel):
     aweme_id = models.CharField(max_length=30, null=True)
     desc = models.CharField(max_length=150, null=True)
     create_time = models.DateTimeField(null=True)
-    cover = models.CharField(max_length=255, null=True)
+    cover = models.CharField(max_length=455, null=True)
     like_num = models.IntegerField(null=True)
     comment_num = models.IntegerField(null=True)
     download_num = models.IntegerField(null=True)

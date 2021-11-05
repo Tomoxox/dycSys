@@ -10,14 +10,14 @@
         <div class="layui-form-item">
             <label class="layui-form-label">套餐</label>
             <div class="layui-input-block">
-                <input type="text" disabled name="title" required lay-verify="required" placeholder="请输入标题"
+                <input type="text" disabled name="title" required lay-verify="required" placeholder=""
                        autocomplete="off" class="layui-input" value="基础版">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">状态</label>
             <div class="layui-input-block">
-                <input type="text" disabled name="title" required lay-verify="required" placeholder="请输入标题"
+                <input type="text" disabled name="title" required lay-verify="required" placeholder=""
                        autocomplete="off" class="layui-input" value="生效中">
             </div>
         </div>
@@ -25,29 +25,28 @@
             <label class="layui-form-label">到期时间</label>
             <div class="layui-input-block">
                 <input type="text" disabled name="title" required lay-verify="required"
-                       autocomplete="off" class="layui-input" value="{{ customer.available_till | default:'' }}">
+                       autocomplete="off" class="layui-input" value="{{ customer.available_till | date:'Y-m-d' }}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">剩余监控任务数量</label>
             <div class="layui-input-block">
-                <input type="text" disabled name="title" required lay-verify="required" placeholder="请输入标题"
-                       autocomplete="off" class="layui-input" value="{{ customer.task_num_left }}">
+                <input type="text" disabled name="title" required lay-verify="required" placeholder=""
+                       autocomplete="off" class="layui-input" value="{{ taskLeft }}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">剩余询盘采集数</label>
             <div class="layui-input-block">
-                <input type="text" disabled name="title" required lay-verify="required" placeholder="请输入标题"
-                       autocomplete="off" class="layui-input" value="{{ customer.comment_num_left }}
-         ( 套餐总数 - 监控线索数 - ai推荐线索数 - 加入客户档案数 )">
+                <input type="text" disabled name="title" required lay-verify="required" placeholder=""
+                       autocomplete="off" class="layui-input" value="{{ customer.comment_num_left }}">
             </div>
         </div>
         <div class="layui-form-item">
             <label class="layui-form-label">剩余达人监控数</label>
             <div class="layui-input-block">
-                <input type="text" disabled name="title" required lay-verify="required" placeholder="请输入标题"
-                       autocomplete="off" class="layui-input" value="{{ customer.peer_num_left }}">
+                <input type="text" disabled name="title" required lay-verify="required" placeholder=""
+                       autocomplete="off" class="layui-input" value="{{ peerLeft }}">
             </div>
         </div>
     </div>

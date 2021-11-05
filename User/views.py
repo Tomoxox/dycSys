@@ -17,11 +17,28 @@ def login(request):
             return AjaxReturn(0, '验证码错误')
         phone = request.POST.get('phone')
         password = request.POST.get('password')
-        customer = Customer.objects.filter(phone=phone, password=password)
-        print(customer)
-        if len(customer) > 0:
-            customer = customer[0]
+        customer = Customer.objects.filter(phone=phone, password=password).all()[:1]
         if customer:
+            customer = customer[0]
+            print(customer)
+            if customer.status == 0:
+                return AjaxReturn(0, '账号未激活')
+            if customer.status == 2:
+                return AjaxReturn(0, '账号已封禁')
+            now = datetime.datetime.now()
+            if now >= customer.available_till:
+                return AjaxReturn(0,'账号已过期')
+
+            # 登录之后获取获取最新的session_key
+            # session_key = request.session.session_key
+            # 删除非当前用户session_key的记录
+            # for session in Session.objects.filter(expire_date__gte=datetime.datetime.now()):
+            #     data = session.get_decoded()
+            #     print(data)
+
+
+
+            customer.available_till = datetime.datetime.strftime(customer.available_till,'%Y-%m-%d')
             request.session['customer'] = model_to_dict(customer)
             logging = CustomerLoginLogging(Customer=customer,ip=request.META.get('REMOTE_ADDR'),browser=request.META.get('HTTP_USER_AGENT'))
             logging.save()
@@ -33,7 +50,7 @@ def login(request):
 
 
 def register(request):
-    id = request.GET.get('id', 1)
+    id = request.GET.get('method', 2)
     if request.method == 'POST':
         phone = request.POST.get('phone')
         password = request.POST.get('password')
@@ -272,7 +289,11 @@ def deleteMyHotWord(request):
 
 @require_POST
 def addVideo(request):
-    # print(request.POST)
+    customer = request.session.get('customer')
+    config = Config.objects.filter(id=1).get()
+    myVideo = Video.objects.filter(Customer_id=customer['id']).count()
+    if config.video_num - myVideo <= 0:
+        return AjaxReturn(0, '监控视频数不足')
     dict = {
         'aweme_id': request.POST.get('aweme_id'),
         'desc': request.POST.get('desc'),
@@ -302,7 +323,11 @@ def addVideo(request):
 
 @require_POST
 def addPeer(request):
-    customer = request.session['customer']
+    customer = request.session.get('customer')
+    config = Config.objects.filter(id=1).get()
+    myPeer = Peer.objects.filter(Customer_id=customer['id']).count()
+    if config.peer_num - myPeer <= 0:
+        return AjaxReturn(0, '监控同行数不足')
     if Peer.objects.filter(uid=request.POST.get('uid'), Customer_id=customer['id']).count() == 0:
         newPeer = Peer(uid=request.POST.get('uid'), unique_id=request.POST.get('unique_id'),
                        nickname=request.POST.get('nickname'), signature=request.POST.get('signature'),
@@ -531,7 +556,14 @@ def basicInfo(request):
 
 
 def balance(request):
-    customer = request.session.get('customer')
+    customer = Customer.objects.filter(id=request.session.get('customer')['id']).get()
+    config = Config.objects.filter(id=1).get()
+    myVideo = Video.objects.filter(Customer_id=customer.id).count()
+    videoLeft = config.video_num - myVideo
+    myTask = Task.objects.filter(Customer_id=customer.id).count()
+    taskLeft = config.task_num - myTask
+    myPeer = Peer.objects.filter(Customer_id=customer.id).count()
+    peerLeft = config.peer_num - myPeer
     return render(request, 'user/userCenter/balance.html', locals())
 
 
@@ -597,6 +629,7 @@ def userPage(request, userId):
             return AjaxReturn(1, '获取成功', dy_sign('aweme_post', request.POST.get('id')))
 
     peer = Peer.objects.get(id=userId)
+    tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/common/userPageA.html', locals())
 
 
@@ -631,6 +664,11 @@ def updateTask(request, taskId):
             if 'expert' in key:
                 peer_monitor_ids.append(int(key.split('-')[-1]))
         if taskId == 0:
+            config = Config.objects.filter(id=1).get()
+            myTask = Task.objects.filter(Customer_id=request.session.get('customer')['id']).count()
+            if config.task_num - myTask <= 0:
+                return AjaxReturn(0, '任务数不足')
+
             task = Task(Customer_id=request.session.get('customer')['id'], title=request.POST.get('title', ''),
                         within_days=request.POST.get('day', 0),
                         filter_words=request.POST.get('words', ''), remark=request.POST.get('desc', ''),
@@ -661,7 +699,8 @@ def operateTask(request):
     task = Task.objects.filter(Customer_id=request.session.get('customer')['id'], id=id).get()
     if task:
         if op == 'delete':
-            task.delete()
+            task.is_deleted = 1
+            task.save()
         if op == 'status':
             task.status = (not task.status)
             task.save()

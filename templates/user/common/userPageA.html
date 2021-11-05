@@ -27,7 +27,41 @@
             margin-top: 30px;
             color: orange;
         }
+
+        .seperator {
+            padding: 20px;
+            border-bottom: 1px solid;
+            text-align: center;
+            font-weight: 500;
+            font-size: large;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+        .selected-now {
+            background-color: #39ce63;
+        }
     </style>
+    <div class="task-selections" style="display: none">
+        <div class="layui-layer-shade1"
+             style="z-index: 19891026; background-color: rgb(0, 0, 0); opacity: 0.8;"></div>
+        <div class="layui-layer1 layui-layer-page" style="z-index: 19891027; width: 500px; position: fixed;">
+            <div class="layui-layer-content">
+                <div style="padding: 50px; line-height: 22px; background-color: #668bf9; color: #fff; font-weight: 300;max-height: 400px;overflow: scroll;">
+                    <h1>请选择任务</h1>
+                    {% for task in tasks %}
+                        <div class="seperator layui-anim " data-task-id="{{ task.id }}">{{ task.title }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <span class="layui-layer-setwin"></span>
+            <div class="layui-layer-btn layui-layer-btn-c">
+                <button onclick="confirmTasks()" class="layui-btn layui-btn-normal">加入任务</button>
+                <button onclick="cancel()" class="layui-btn layui-btn-primary">取消</button>
+            </div>
+            <span class="layui-layer-resize"></span>
+        </div>
+    </div>
     <div style="padding: 10px">
         <div class="profile layui-row">
             <div class="center layui-col-xs3">
@@ -91,24 +125,49 @@
             });
             qrcode.makeCode('snssdk1128://user/profile/' + {{ peer.uid }} +'?refer=web&gd_label=click_wap_detail_download_feature&needlaunchlog=1');
 
+            $('.seperator').click(function () {
+                var taskId = $(this).attr('data-task-id');
+                var selected = $(this).hasClass('selected-now');
+                if (selected) {
+                    $(this).removeClass('selected-now');
+                    $(this).removeClass('layui-anim-scale');
+                    taskList.remove(taskId);
+                } else {
+                    $(this).addClass('selected-now');
+                    $(this).addClass('layui-anim-scale');
+                    taskList.push(taskId);
+                }
+                console.log(taskList);
+            });
         });
+        let videoList = null;
+        let taskList = [];
+        let videoData = null;
+        Array.prototype.remove = function (val) {
+            var index = this.indexOf(val);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        };
 
         function search() {
             let dict = {
                 scene: 'userPage',
                 id: '{{ peer.sec_uid }}'
             }
-            $.post('',dict,function (data) {
-                    layer.closeAll();
-                    layer.msg(data.msg);
-                    userPage(data.data);
-                });
+            $.post('', dict, function (data) {
+                layer.closeAll();
+                layer.msg(data.msg);
+                userPage(data.data);
+            });
         }
 
 
         function userPage(data) {
             {#console.log(data);#}
             if (data.aweme_list.length > 0) {
+                videoList = data.aweme_list;
+                console.log(videoList);
                 $('#HOT_VIDEOS').empty();
                 for (var i = 0; i < data.aweme_list.length; i++) {
                     let awemeInfo = data.aweme_list[i];
@@ -148,7 +207,7 @@
                         '                                                </span>\n' +
                         '                                            </div>\n' +
                         '                                            <span class="d170ababc38fdbf760ca677dbaa9206a-scss">\n' +
-                        '                                                ' + '评论'+awemeInfo.statistics.comment_count + '\n' +
+                        '                                                ' + '评论' + awemeInfo.statistics.comment_count + '\n' +
                         '                                            </span>\n' +
                         '                                        </div>\n' +
                         '                                    </div>\n' +
@@ -202,13 +261,40 @@
                         '                            <button onclick="comments(' + '\'' + awemeInfo.aweme_id + '\'' + ')" type="button" class="pull-left layui-btn layui-btn-warm layui-border-orange"><i\n' +
                         '                                    class="layui-icon">&#xe63a;</i>查看评论\n' +
                         '                            </button>\n' +
-                        '                            <button type="button" class="pull-right layui-btn layui-btn-warm layui-border-orange"><i\n' +
+                        '                            <button onclick="addVideo(' + i + ')" type="button" class="pull-right layui-btn layui-btn-warm layui-border-orange"><i\n' +
                         '                                    class="layui-icon">&#xe624;</i>加入监控\n' +
                         '                            </button>\n' +
                         '                        </div>\n' +
                         '                    </li>')
                 }
             }
+        }
+
+        function addVideo(index) {
+            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 250 + 'px');
+            $('.task-selections').show();
+            videoData = videoList[index];
+
+            console.log('videoList');
+            console.log(videoList);
+            console.log(videoData);
+        }
+
+        function confirmTasks() {
+            console.log(videoData);
+            console.log(taskList);
+            if (videoData && taskList.length > 0) {
+                videoData.task_ids = taskList.join(',');
+                $.post('{% url "user-addVideo" %}', videoData, function (data) {
+                    $('.task-selections').hide();
+                    layer.msg(data.msg)
+                });
+            }
+
+        }
+
+        function cancel() {
+            $('.task-selections').hide();
         }
 
         function comments(videoId) {

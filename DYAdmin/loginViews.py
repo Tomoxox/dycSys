@@ -16,8 +16,9 @@ def login(request):
             request.session['delegateId'] = 0
             return AjaxReturn(1, '登录成功')
 
-        dele = Delegate.objects.filter(phone=username,password=password).get()
-        if dele:
+        dele = Delegate.objects.filter(phone=username,password=password).all()[:1]
+        if len(dele) > 0:
+            dele = dele[0]
             if dele.status == 1:
                 request.session['delegateId'] = dele.id
                 return AjaxReturn(1,'登录成功')

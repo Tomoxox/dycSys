@@ -9,7 +9,11 @@ from django.db.models import Sum
 
 
 def index(request):
-    return render(request, 'admin/index.html')
+    if request.session.get('delegateId') == 0:
+        role = '超级管理员'
+    else:
+        role = Delegate.objects.filter(id=request.session.get('delegateId')).values('phone')[0]['phone']
+    return render(request, 'admin/index.html',locals())
 
 def home(request):
     # 管理： 已售询盘(消耗的+客户的+代理的)、已消耗询盘、代理数量、客户数量
@@ -70,6 +74,7 @@ def home(request):
             },
         ]
     commentList = Comment.objects.all()[:9]
+
     return render(request, 'admin/home.html', locals())
 
 def leftMenus(request):
