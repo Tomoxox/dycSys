@@ -50,18 +50,15 @@ def home(request):
         for a in arr:
             customerArr.append(a['id'])
         total_comment = Comment.objects.filter(Customer_id__in=customerArr).all().count()
-        if not total_comment:
-            total_comment = 0
 
         customer_left = Customer.objects.filter(id__in=customerArr).aggregate(total=Sum('comment_num_left'))
-        if not customer_left:
-            customer_left = 0
+        customer_left = customer_left.get('total',0) if customer_left else 0
         customers = dele.customer_set.all().count()
 
         dict = [
             {
                 'title': '已售询盘',
-                'num': total_comment + customer_left['total'],
+                'num': total_comment + customer_left,
             },
             {
                 'title': '剩余询盘',
