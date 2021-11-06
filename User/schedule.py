@@ -50,10 +50,12 @@ def taskBegin(task):
                         if page == 1:
                             commentData = firstPage
                         else:
-                            if flag:
-                                commentData = scrawl('comment', task.id, video.aweme_id, page)
+                            # if flag:
+                            commentData = scrawl('comment', task.id, video.aweme_id, page)
+
 
                         if commentData and len(commentData['comments']) > 0:
+                            logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
                             for comm in commentData['comments']:
                                 hit = []
@@ -66,9 +68,9 @@ def taskBegin(task):
                                     # 保存评论
                                     if checkNSubCommentNum(task.Customer_id):
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit)
-                                    else:
-                                        flag = False
-                                        break
+                                    # else:
+                                    #     flag = False
+                                    #     break
 
                                 # 保存赞超过10的
                                 elif comm['digg_count'] >= 50:
@@ -84,10 +86,11 @@ def taskBegin(task):
                         if page == 1:
                             commentData = firstPage
                         else:
-                            if flag:
-                                commentData = scrawl('comment', task.id, video.aweme_id, page)
+                            # if flag:
+                            commentData = scrawl('comment', task.id, video.aweme_id, page)
 
                         if commentData and len(commentData['comments']) > 0:
+                            logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
                             for comm in commentData['comments']:
                                 hit = []
@@ -101,9 +104,9 @@ def taskBegin(task):
                                     if checkNSubCommentNum(task.Customer_id):
                                         if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
                                             saveComment(comm, task.Customer_id, task.id, video.id, hit)
-                                    else:
-                                        flag = False
-                                        break
+                                    # else:
+                                    #     flag = False
+                                    #     break
 
                                 # 保存赞超过10的
                                 elif comm['digg_count'] >= 50:
@@ -117,7 +120,7 @@ def taskBegin(task):
             break
     # 更新同行视频列表 不要更新总评论数
     if flag:
-        peerArr = Peer.objects.filter(Customer_id=task.Customer_id).all()
+        peerArr = Peer.objects.filter(id__in=json.loads(task.peer_monitor_ids)).all()
         for peer in peerArr:
             logger.error(f'-------peer {peer.nickname}-------')
 
@@ -128,13 +131,15 @@ def taskBegin(task):
                     # peer.avatar_thumb = video['author']['avatar_thumb']['url_list'][0]
                     # peer.signature = video['author']['signature']
                     # 保存视频列表
-                    if PeerVideo.objects.filter(Customer_id=task.Customer_id, aweme_id=video['aweme_id']).count() == 0:
+                    if PeerVideo.objects.filter(Task_id=task.id, aweme_id=video['aweme_id']).count() == 0:
+                        print(f"add peerV {video['desc']} ")
                         peerVideo = PeerVideo(Customer_id=task.Customer_id, aweme_id=video['aweme_id'], Task_id=task.id,
                                               Peer_id=peer.id, desc=video['desc'])
                         peerVideo.save()
         # 遍历同行视频
         # 过滤 或者 点赞高的
         peerVideoArr = task.peervideo_set.all()
+        print(peerVideoArr)
         for peerV in peerVideoArr:
             logger.error(f'-------peerVideo {peerV.desc}-------')
             # 看看当前任务是否还在 TASK_LIST 里面
@@ -155,10 +160,11 @@ def taskBegin(task):
                             if page == 1:
                                 commentData = firstPage
                             else:
-                                if flag:
-                                    commentData = scrawl('comment', task.id, peerV.aweme_id, page)
+                                # if flag:
+                                commentData = scrawl('comment', task.id, peerV.aweme_id, page)
 
                             if commentData and len(commentData['comments']) > 0:
+                                logger.error(f"peer_V_comment----{len(commentData['comments'])}")
                                 # 过滤任务关键词
                                 for comm in commentData['comments']:
                                     hit = []
@@ -172,9 +178,9 @@ def taskBegin(task):
 
                                         if checkNSubCommentNum(task.Customer_id):
                                             saveComment(comm, task.Customer_id, task.id, peerV.id, hit, is_peerVideo=True)
-                                        else:
-                                            flag = False
-                                            break
+                                        # else:
+                                        #     flag = False
+                                        #     break
 
                                     # 保存赞超过10的
                                     elif comm['digg_count'] >= 10:
@@ -191,10 +197,11 @@ def taskBegin(task):
                             if page == 1:
                                 commentData = firstPage
                             else:
-                                if flag:
-                                    commentData = scrawl('comment', task.id, peerV.aweme_id, page)
+                                # if flag:
+                                commentData = scrawl('comment', task.id, peerV.aweme_id, page)
 
                             if commentData and len(commentData['comments']) > 0:
+                                logger.error(f"peer_V_comment----{len(commentData['comments'])}")
                                 # 过滤任务关键词
                                 for comm in commentData['comments']:
                                     hit = []
@@ -236,11 +243,14 @@ def checkNSubCommentNum(Customer_id):
         with transaction.atomic():
             cus = Customer.objects.filter(id=Customer_id).get()
             if cus.comment_num_left <= 0:
+                print(f'1  {cus.comment_num_left}')
                 return
             cus.comment_num_left -= 1
             cus.save()
     except DatabaseError:
         return
+
+    print(f'2  {cus.comment_num_left}')
     return True
 
 def saveComment(comm, Customer_id, Task_id, Video_id, hit, is_ai=0, is_peerVideo=False):
@@ -299,7 +309,7 @@ def addTask(task):
     # 30分钟前执行过的才执行
     import time
     now = time.time()
-    if now - task.updated_at.timestamp() > 30 * 60 or now - task.created_at.timestamp() < 15 * 60:
+    if now - task.updated_at.timestamp() > 3 * 60 or now - task.created_at.timestamp() < 3 * 60:
         red = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
         arr = json.loads(red.get(TASK_LIST))
