@@ -50,7 +50,7 @@ def login(request):
 
 
 def register(request):
-    id = request.GET.get('method', 2)
+    request.session['method'] = request.GET.get('method', 2)
     if request.method == 'POST':
         phone = request.POST.get('phone')
         password = request.POST.get('password')
@@ -63,7 +63,7 @@ def register(request):
         count = Customer.objects.filter(phone=phone).count()
         if count:
             return AjaxReturn(0, '用户已存在')
-        cus = Customer(phone=phone, password=password, Delegate_id=id)
+        cus = Customer(phone=phone, password=password, Delegate_id=request.session.get('method',2))
         cus.save()
         return AjaxReturn(1, '注册成功，请先激活')
     return render(request, 'user/register.html', locals())
