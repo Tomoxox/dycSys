@@ -322,6 +322,8 @@ def addTask(task):
     # 启动一条任务线程
     # 30分钟前执行过的才执行
     import time
+
+    logger = logging.getLogger('django')
     now = time.time()
     if now - task.updated_at.timestamp() > 3 * 60 or now - task.created_at.timestamp() < 3 * 60:
         red = redis.Redis(host='localhost', port=6379, decode_responses=True)
@@ -334,6 +336,9 @@ def addTask(task):
         red.set(TASK_LIST, json.dumps(arr))
         red.close()
 
+        logger.error(f'addTask----------{task.id} {task.title}-----------{datetime.now()}')
+    else:
+        logger.error(f'addTask Failed----------{task.id} {task.title}-----------{datetime.now()}')
     return HttpResponse(datetime.now())
 
 
