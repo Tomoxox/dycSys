@@ -1,12 +1,12 @@
 from django.shortcuts import HttpResponse
 from _datetime import datetime
 from .browser import Browser
-import redis, json, math, re, sys,time
+import redis, json, math, re, sys, time
 from DYAdmin.models import Task, Customer, Peer, PeerVideo, Comment
 import threading
-from .API import scrawl,dy_sign
+from .API import scrawl, dy_sign
 import logging
-from django.db import DatabaseError,transaction
+from django.db import DatabaseError, transaction
 
 # Redis keys
 TASK_LIST = 'TASK_LIST'
@@ -18,9 +18,10 @@ def updateHotTopics(request):
     # 爬取后存redis
     data = dy_sign('hot_topic')
     red = redis.Redis(host='localhost', port=6379, decode_responses=True)
-    red.set(HOT_TOPIC,json.dumps(data))
+    red.set(HOT_TOPIC, json.dumps(data))
     red.close()
     return HttpResponse(datetime.now())
+
 
 def taskBegin(task):
     logger = logging.getLogger('django')
@@ -53,7 +54,6 @@ def taskBegin(task):
                             # if flag:
                             commentData = scrawl('comment', task.id, video.aweme_id, page)
 
-
                         if commentData and len(commentData['comments']) > 0:
                             logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
@@ -67,14 +67,17 @@ def taskBegin(task):
                                     '''---------------------------'''
                                     # 保存评论
                                     if checkNSubCommentNum(task.Customer_id):
-                                        saveComment(comm, task.Customer_id, task.id, video.id, hit)
-                                    # else:
-                                    #     flag = False
-                                    #     break
+                                        if Comment.objects.filter(cid=comm['cid'],
+                                                                  Task_id=task.id).count() == 0:
+                                            saveComment(comm, task.Customer_id, task.id, video.id, hit)
+                                    else:
+                                        flag = False
+                                        break
 
-                                # 保存赞超过10的
+                                # 保存赞超过50的
                                 elif comm['digg_count'] >= 50:
-                                    if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
+                                    if Comment.objects.filter(cid=comm['cid'],
+                                                              Task_id=task.id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit, is_ai=1)
 
                         if commentData['has_more'] == 0:
@@ -102,15 +105,17 @@ def taskBegin(task):
                                     '''---------------------------'''
                                     # 保存评论
                                     if checkNSubCommentNum(task.Customer_id):
-                                        if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
+                                        if Comment.objects.filter(cid=comm['cid'],
+                                                                  Task_id=task.id).count() == 0:
                                             saveComment(comm, task.Customer_id, task.id, video.id, hit)
-                                    # else:
-                                    #     flag = False
-                                    #     break
+                                    else:
+                                        flag = False
+                                        break
 
-                                # 保存赞超过10的
+                                # 保存赞超过50的
                                 elif comm['digg_count'] >= 50:
-                                    if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
+                                    if Comment.objects.filter(cid=comm['cid'],
+                                                              Task_id=task.id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit, is_ai=1)
 
                         if commentData['has_more'] == 0:
@@ -132,7 +137,7 @@ def taskBegin(task):
                     # peer.signature = video['author']['signature']
                     # 保存视频列表
                     if PeerVideo.objects.filter(Task_id=task.id, aweme_id=video['aweme_id']).count() == 0:
-                        print(f"add peerV {video['desc']} ")
+                        logger.error(f"add peerV {video['desc']} ")
                         peerVideo = PeerVideo(Customer_id=task.Customer_id, aweme_id=video['aweme_id'], Task_id=task.id,
                                               Peer_id=peer.id, desc=video['desc'])
                         peerVideo.save()
@@ -177,14 +182,18 @@ def taskBegin(task):
                                         # 保存评论
 
                                         if checkNSubCommentNum(task.Customer_id):
-                                            saveComment(comm, task.Customer_id, task.id, peerV.id, hit, is_peerVideo=True)
-                                        # else:
-                                        #     flag = False
-                                        #     break
+                                            if Comment.objects.filter(cid=comm['cid'],
+                                                                      Task_id=task.id).count() == 0:
+                                                saveComment(comm, task.Customer_id, task.id, peerV.id, hit,
+                                                            is_peerVideo=True)
+                                        else:
+                                            flag = False
+                                            break
 
-                                    # 保存赞超过10的
-                                    elif comm['digg_count'] >= 10:
-                                        if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
+                                    # 保存赞超过50的
+                                    elif comm['digg_count'] >= 50:
+                                        if Comment.objects.filter(cid=comm['cid'],
+                                                                      Task_id=task.id).count() == 0:
                                             saveComment(comm, task.Customer_id, task.id, peerV.id, hit, is_ai=1,
                                                         is_peerVideo=True)
 
@@ -212,12 +221,15 @@ def taskBegin(task):
                                         '''---------------------------'''
                                         # 保存评论
                                         if checkNSubCommentNum(task.Customer_id):
-                                            if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
-                                                saveComment(comm, task.Customer_id, task.id, peerV.id, hit, is_peerVideo=True)
+                                            if Comment.objects.filter(cid=comm['cid'],
+                                                                      Customer_id=task.Customer_id).count() == 0:
+                                                saveComment(comm, task.Customer_id, task.id, peerV.id, hit,
+                                                            is_peerVideo=True)
 
-                                    # 保存赞超过10的
+                                    # 保存赞超过50的
                                     elif comm['digg_count'] >= 50:
-                                        if Comment.objects.filter(cid=comm['cid'], Customer_id=task.Customer_id).count() == 0:
+                                        if Comment.objects.filter(cid=comm['cid'],
+                                                                  Customer_id=task.Customer_id).count() == 0:
                                             saveComment(comm, task.Customer_id, task.id, peerV.id, hit, is_ai=1,
                                                         is_peerVideo=True)
                             if commentData['has_more'] == 0:
@@ -237,6 +249,7 @@ def checkTask(id):
         return True
     return
 
+
 def checkNSubCommentNum(Customer_id):
     # 扣评论数
     try:
@@ -252,6 +265,7 @@ def checkNSubCommentNum(Customer_id):
 
     print(f'2  {cus.comment_num_left}')
     return True
+
 
 def saveComment(comm, Customer_id, Task_id, Video_id, hit, is_ai=0, is_peerVideo=False):
     vx = re.compile(r'[a-zA-Z0-9]{6,20}').findall(comm['user']['signature'])
@@ -321,6 +335,7 @@ def addTask(task):
         red.close()
 
     return HttpResponse(datetime.now())
+
 
 def testTask(request):
     # task = Task.objects.filter(status=0).all()
