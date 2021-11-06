@@ -710,9 +710,9 @@ def operateTask(request):
             task.status = (not task.status)
             task.save()
         if op == 'execute':
+            addTask(task)
             task.status = 1
             task.save()
-            addTask(task)
             return AjaxReturn(1,'执行中')
     return AjaxReturn(1, '删除成功')
 
