@@ -234,7 +234,7 @@ def update(request, model):
             param = getattr(model, 'checkParam')(param)
             if not param:
                 return AjaxReturn(0,'数据错误')
-        print(param)
+        # print(param)
         model.objects.filter(id=id).update(**param)
         return AjaxReturn(1, '修改成功')
 

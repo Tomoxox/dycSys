@@ -92,6 +92,14 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PORT': 8889,
     }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'dy_comment',
+    #     'USER': 'dy_comment',
+    #     'PASSWORD': '123dy_comment456',
+    #     'HOST': '106.75.175.114',
+    #     'PORT': 3306,
+    # }
 }
 
 SESSION_COOKIE_HTTPONLY = True

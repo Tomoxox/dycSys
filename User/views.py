@@ -355,7 +355,9 @@ def douyinHot(request):
 
 def peerMonitor(request):
     if request.method == 'POST':
-        dic = {}
+        dic = {
+            'Customer_id' : request.session.get('customer')['id']
+        }
         input_type = request.POST.get('input_type')
         input_text = request.POST.get('input_text')
         if input_type and len(input_type) > 0 and input_text and len(input_text) > 0:
@@ -377,7 +379,8 @@ def deletePeer(request):
     customer = request.session['customer']
     peer = Peer.objects.filter(id=id, Customer_id=customer['id']).get()
     if peer:
-        peer.delete()
+        peer.is_deleted = 1
+        peer.save()
     return AjaxReturn(1, '删除成功')
 
 def videoMonitor(request):
@@ -414,6 +417,7 @@ def marketingClue(request):
         }
         task = request.POST.get('task')
         contact = request.POST.get('contact')
+        hit_word = request.POST.get('hit_word')
         if task:
             dic['Task_id'] = task
         if contact == '1':
@@ -423,7 +427,8 @@ def marketingClue(request):
             dic['phone__isnull'] = False
         elif contact == '3':
             dic['vx__isnull'] = False
-        print(dic)
+        if hit_word:
+            dic['hit_word__contains'] = hit_word
         page = int(request.POST.get('page', 1))
         nums = int(request.POST.get('limit', 20))
         count = Comment.objects.filter(**dic).count()

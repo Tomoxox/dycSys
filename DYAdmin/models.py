@@ -584,6 +584,13 @@ class Task(BaseModel):
                 'align': 'center'
             },
             {
+                'field': 'customer',
+                'title': '客户',
+                'width': 200,
+                'minWidth': 200,
+                'align': 'center'
+            },
+            {
                 'field': 'title',
                 'title': '任务名',
                 'width': 200,
@@ -683,6 +690,7 @@ class Task(BaseModel):
     def formatData(data=[]):
         for d in data:
             d['status'] = TASK_STATUS[d['status']]
+            d['customer'] = Customer.objects.filter(id=d['Customer_id']).get().phone
         return data
 
 
@@ -763,11 +771,19 @@ class Comment(BaseModel):
             except:
                 d['TaskTitle'] = '-'
             if d.get('Video_id'):
-                d['VideoTitle'] = Video.objects.filter(id=d['Video_id']).get().desc
-                d['VideoId'] = Video.objects.filter(id=d['Video_id']).get().aweme_id
+                try:
+                    d['VideoTitle'] = Video.objects.filter(id=d['Video_id']).get().desc
+                    d['VideoId'] = Video.objects.filter(id=d['Video_id']).get().aweme_id
+                except:
+                    d['VideoTitle'] = '-'
+                    d['VideoId'] = '-'
             else:
-                d['VideoTitle'] = PeerVideo.objects.filter(id=d['PeerVideo_id']).get().desc
-                d['VideoId'] = PeerVideo.objects.filter(id=d['PeerVideo_id']).get().aweme_id
+                try:
+                    d['VideoTitle'] = PeerVideo.objects.filter(id=d['PeerVideo_id']).get().desc
+                    d['VideoId'] = PeerVideo.objects.filter(id=d['PeerVideo_id']).get().aweme_id
+                except:
+                    d['VideoTitle'] = '-'
+                    d['VideoId'] = '-'
         return data
 
 class Consumer(BaseModel):
