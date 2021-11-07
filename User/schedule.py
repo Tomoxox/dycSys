@@ -27,6 +27,8 @@ def taskBegin(task):
     logger = logging.getLogger('django')
     logger.error(f'begin----------{task.id} {task.title}-----------{datetime.now()}')
     # TODO 查看上次任务是否还在进行
+    # TODO 每个视频上次爬到第几页
+
     task.save()
     # 遍历task的video
     flag = True
@@ -54,7 +56,7 @@ def taskBegin(task):
                             # if flag:
                             commentData = scrawl('comment', task.id, video.aweme_id, page)
 
-                        if commentData and len(commentData['comments']) > 0:
+                        if commentData and commentData['comments'] and len(commentData['comments']) > 0:
                             logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
                             for comm in commentData['comments']:
@@ -92,7 +94,7 @@ def taskBegin(task):
                             # if flag:
                             commentData = scrawl('comment', task.id, video.aweme_id, page)
 
-                        if commentData and len(commentData['comments']) > 0:
+                        if commentData and commentData['comments'] and len(commentData['comments']) > 0:
                             logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
                             for comm in commentData['comments']:
@@ -130,7 +132,8 @@ def taskBegin(task):
             logger.error(f'-------peer {peer.nickname}-------')
 
             peerVedioList = scrawl('aweme_post', task.id, peer.sec_uid, 1)
-            if peerVedioList and len(peerVedioList['aweme_list']) > 0:
+            print(peer.sec_uid)
+            if peerVedioList and peerVedioList['aweme_list'] and len(peerVedioList['aweme_list']) > 0:
                 for video in peerVedioList['aweme_list']:
                     # # 更新粉丝 点赞
                     # peer.avatar_thumb = video['author']['avatar_thumb']['url_list'][0]
@@ -168,7 +171,7 @@ def taskBegin(task):
                                 # if flag:
                                 commentData = scrawl('comment', task.id, peerV.aweme_id, page)
 
-                            if commentData and len(commentData['comments']) > 0:
+                            if commentData and commentData['comments'] and len(commentData['comments']) > 0:
                                 logger.error(f"peer_V_comment----{len(commentData['comments'])}")
                                 # 过滤任务关键词
                                 for comm in commentData['comments']:
@@ -209,7 +212,7 @@ def taskBegin(task):
                                 # if flag:
                                 commentData = scrawl('comment', task.id, peerV.aweme_id, page)
 
-                            if commentData and len(commentData['comments']) > 0:
+                            if commentData and commentData['comments'] and len(commentData['comments']) > 0:
                                 logger.error(f"peer_V_comment----{len(commentData['comments'])}")
                                 # 过滤任务关键词
                                 for comm in commentData['comments']:
@@ -326,6 +329,7 @@ def addTask(task):
     logger = logging.getLogger('django')
     now = time.time()
     if now - task.updated_at.timestamp() > 3 * 60 or now - task.created_at.timestamp() < 3 * 60:
+    # if True:
         red = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
         arr = json.loads(red.get(TASK_LIST))

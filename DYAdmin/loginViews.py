@@ -8,7 +8,7 @@ import datetime
 def login(request):
     if request.method == 'POST':
         captcha = request.POST.get('code')
-        if captcha.upper() != request.session['captcha']:
+        if captcha.upper() != request.session.get('captcha'):
             return AjaxReturn(0,'验证码错误')
         username = request.POST.get('user')
         password = request.POST.get('pass')
@@ -30,7 +30,7 @@ def login(request):
             else:
                 return AjaxReturn(0, '账号已失效')
         else:
-            del request.session['captcha']
+            request.session.flush()
             return AjaxReturn(0, '账号或密码错误')
 
     if request.session.get('delegateId'):
