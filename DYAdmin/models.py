@@ -560,7 +560,7 @@ class Task(BaseModel):
     title = models.CharField(max_length=16, null=True)
     within_days = models.IntegerField(null=True)
     filter_words = models.CharField(max_length=255,null=True)
-    peer_monitor_ids = models.CharField(max_length=255,null=True)
+    peer_monitor_ids = models.CharField(max_length=855,null=True)
     status = models.SmallIntegerField(null=True,default=1)
     remark = models.CharField(max_length=255,null=True)
     objects = BaseManager()
