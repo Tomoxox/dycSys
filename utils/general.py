@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, reverse
 from random import randint
-
+import redis,json
 
 def admin_login_required(view_func):
     '''登录判断装饰器'''
@@ -26,6 +26,23 @@ def user_login_required(view_func):
         else:
             # 跳转到登录页面
             return redirect(reverse('user-login'))
+
+    return wrapper
+
+def android_login_required(view_func):
+    '''登录判断装饰器'''
+    def wrapper(request, *view_args, **view_kwargs):
+        if request.body:
+            data = json.loads(request.body)
+            token = data.get('token')
+            if token:
+                red = redis.Redis(host='localhost', port=6379, decode_responses=True)
+                customerId = red.get(token)
+                red.close()
+                if customerId:
+                    return view_func(request, *view_args, **view_kwargs)
+
+        return AjaxReturn(0,'登录过期')
 
     return wrapper
 

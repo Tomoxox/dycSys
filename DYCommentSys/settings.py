@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 from pathlib import Path
 import os
+import corsheaders
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'User',
     'DYAdmin',
+    'corsheaders',
     # 'channels'
 ]
 
@@ -49,7 +51,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'DYCommentSys.urls'
 
@@ -84,22 +89,22 @@ WSGI_APPLICATION = 'DYCommentSys.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'dy_comment',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': '127.0.0.1',
-        'PORT': 8889,
-    }
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
     #     'NAME': 'dy_comment',
-    #     'USER': 'dy_comment',
-    #     'PASSWORD': '123dy_comment456',
-    #     'HOST': '106.75.175.114',
-    #     'PORT': 3306,
+    #     'USER': 'root',
+    #     'PASSWORD': '123456',
+    #     'HOST': '127.0.0.1',
+    #     'PORT': 8889,
     # }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'dy_comment',
+        'USER': 'dy_comment',
+        'PASSWORD': '123dy_comment456',
+        'HOST': '106.75.175.114',
+        'PORT': 3306,
+    }
 }
 
 SESSION_COOKIE_HTTPONLY = True

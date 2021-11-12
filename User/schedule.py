@@ -157,6 +157,8 @@ def taskBegin(task):
                 if not peerV.comment_num:
                     old_comment_num = 0
                 firstPage = scrawl('comment', task.id, peerV.aweme_id, 1)
+
+                logger.error(f'-------peerVideo comment total {firstPage["total"]}-------')
                 if firstPage:
                     # 更新评论数
                     peerV.comment_num = firstPage['total']
@@ -328,8 +330,8 @@ def addTask(task):
 
     logger = logging.getLogger('django')
     now = time.time()
-    if now - task.updated_at.timestamp() > 3 * 60 or now - task.created_at.timestamp() < 3 * 60:
-    # if True:
+    # if now - task.updated_at.timestamp() > 3 * 60 or now - task.created_at.timestamp() < 3 * 60:
+    if True:
         red = redis.Redis(host='localhost', port=6379, decode_responses=True)
 
         arr = json.loads(red.get(TASK_LIST))

@@ -668,6 +668,8 @@ def updateTask(request, taskId):
         for key in request.POST.keys():
             if 'expert' in key:
                 peer_monitor_ids.append(int(key.split('-')[-1]))
+        if len(peer_monitor_ids) > 15:
+            return AjaxReturn(0, '单个任务最高监控15个达人')
         if taskId == 0:
             config = Config.objects.filter(id=1).get()
             myTask = Task.objects.filter(Customer_id=request.session.get('customer')['id']).count()

@@ -1,6 +1,6 @@
 from django.urls import path
-from . import views,schedule
-from utils.general import user_login_required
+from . import views,schedule,android
+from utils.general import user_login_required,android_login_required
 urlpatterns = [
     path('login', views.login,name='user-login'),
     path('register', views.register,name='user-register'),
@@ -55,4 +55,15 @@ urlpatterns = [
     path('balance', user_login_required(views.balance),name='user-balance'),
     path('updatePass', user_login_required(views.updatePass),name='user-updatePass'),
     path('loginLogging', user_login_required(views.loginLogging),name='user-loginLogging'),
+
+
+    path('an/login', android.login),
+    path('an/home', android_login_required(android.home)),
+    path('an/peers', android_login_required(android.peers)),
+    path('an/tasks', android_login_required(android.tasks)),
+    path('an/switchTask', android_login_required(android.switchTask)),
+    path('an/clue', android_login_required(android.clue)),
+    path('an/clients', android_login_required(android.clients)),
+    path('an/updateClue', android_login_required(android.updateClue)),
+
 ]
