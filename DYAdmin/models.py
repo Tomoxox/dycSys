@@ -484,13 +484,10 @@ class Customer(BaseModel):
 
     @staticmethod
     def formatData(data=[]):
-        delePhone = None
         for d in data:
-            if not delePhone:
-                self = Customer.objects.filter(id=d['id']).get()
-                delePhone = self.Delegate.phone
+            dele = Delegate.objects.filter(id=d['Delegate_id']).get()
             d['status'] = ACCOUNT_STATUS[d['status']]
-            d['delegate'] = delePhone
+            d['delegate'] = dele.phone
         return data
 
     @staticmethod
