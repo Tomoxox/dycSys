@@ -646,11 +646,13 @@ def searchVideo(request, words):
         words = words.words
     else:
         return HttpResponse('')
+    tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/common/searchVideoA.html', locals())
 
 def searchVideoByWords(request, words):
     if request.method == 'POST':
         return AjaxReturn(1, '获取成功', dy_sign('search_video', request.POST.get('keyword')))
+    tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/common/searchVideoA.html', locals())
 
 
@@ -659,6 +661,7 @@ def chooseTask(request):
         pass
         return AjaxReturn(1, '添加成功')
 
+    tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/common/searchVideoA.html', locals())
 
 

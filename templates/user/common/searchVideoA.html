@@ -1,6 +1,67 @@
 {% extends "../../base.html" %}
 {% load static %}
 {% block body %}
+    <style>
+        .center {
+            text-align: center;
+        }
+
+        .orange {
+            color: orange;
+        }
+
+        .profile * {
+            margin-bottom: 5px;
+        }
+
+        .br {
+            display: block;
+            height: 1px;
+            width: 100%;
+            margin: 24px 0;
+            background-color: #dcdfe6;
+        }
+
+        .layui-tab-item h2 {
+            text-align: center;
+            margin-top: 30px;
+            color: orange;
+        }
+
+        .seperator {
+            padding: 20px;
+            border-bottom: 1px solid;
+            text-align: center;
+            font-weight: 500;
+            font-size: large;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+        .selected-now {
+            background-color: #39ce63;
+        }
+    </style>
+    <div class="task-selections" style="display: none">
+        <div class="layui-layer-shade1"
+             style="z-index: 19891026; background-color: rgb(0, 0, 0); opacity: 0.8;"></div>
+        <div class="layui-layer1 layui-layer-page" style="z-index: 19891027; width: 500px; position: fixed;">
+            <div class="layui-layer-content">
+                <div style="padding: 50px; line-height: 22px; background-color: #668bf9; color: #fff; font-weight: 300;max-height: 400px;overflow: scroll;">
+                    <h1>请选择任务</h1>
+                    {% for task in tasks %}
+                        <div class="seperator layui-anim " data-task-id="{{ task.id }}">{{ task.title }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <span class="layui-layer-setwin"></span>
+            <div class="layui-layer-btn layui-layer-btn-c">
+                <button onclick="confirmTasks()" class="layui-btn layui-btn-normal">加入任务</button>
+                <button onclick="cancel()" class="layui-btn layui-btn-primary">取消</button>
+            </div>
+            <span class="layui-layer-resize"></span>
+        </div>
+    </div>
     <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
         <ul class="hot-video-ul layui-row" id="HOT_VIDEOS">
 
@@ -11,15 +72,36 @@
         let chatSocket = null;
         var layer = null;
         let okLayer = null;
+        let videoList = [];
+        let taskList = [];
+        let videoData = null;
+        Array.prototype.remove = function (val) {
+            var index = this.indexOf(val);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        };
         layui.use(['layer', 'element', 'okLayer'], function () {
             layer = layui.layer;
             okLayer = layui.okLayer;
         });
         $(function () {
             search();
-            okLoading.close();
+            $('.seperator').click(function () {
+                var taskId = $(this).attr('data-task-id');
+                var selected = $(this).hasClass('selected-now');
+                if (selected) {
+                    $(this).removeClass('selected-now');
+                    $(this).removeClass('layui-anim-scale');
+                    taskList.remove(taskId);
+                } else {
+                    $(this).addClass('selected-now');
+                    $(this).addClass('layui-anim-scale');
+                    taskList.push(taskId);
+                }
+                console.log(taskList);
+            });
         });
-
         function search() {
             {#layer.load();#}
             let dict = {
@@ -30,6 +112,7 @@
                     layer.closeAll();
                     layer.msg(data.msg);
                     hot_videos(data.data);
+                    okLoading.close();
                 });
         }
 
@@ -39,6 +122,7 @@
             if (data.data.length > 0) {
                 $('#HOT_VIDEOS').empty();
                 for (var i = 0; i < data.data.length; i++) {
+                    videoList.push(data.data[i].aweme_info);
                     let awemeInfo = data.data[i].aweme_info;
                     var time = getYMDHMS(awemeInfo.create_time);
                     {#console.log(time)#}
@@ -130,7 +214,7 @@
                         '                            <button onclick="comments(' + '\'' + awemeInfo.aweme_id + '\'' + ')" type="button" class="pull-left layui-btn layui-btn-warm layui-border-orange"><i\n' +
                         '                                    class="layui-icon">&#xe63a;</i>查看评论\n' +
                         '                            </button>\n' +
-                        '                            <button type="button" class="pull-right layui-btn layui-btn-warm layui-border-orange"><i\n' +
+                        '                            <button onclick="addVideo(' + i + ')" type="button" class="pull-right layui-btn layui-btn-warm layui-border-orange"><i\n' +
                         '                                    class="layui-icon">&#xe624;</i>加入监控\n' +
                         '                            </button>\n' +
                         '                        </div>\n' +
@@ -143,7 +227,31 @@
             okLayer.open('查看评论', '/commentPage/' + videoId, "90%", "90%", null, function () {
             })
         }
+        function addVideo(index) {
+            $('.layui-layer1').css('left', $(window).innerWidth() / 2 - 250 + 'px');
+            $('.task-selections').show();
+            videoData = videoList[index];
 
+            console.log('videoList');
+            console.log(videoList);
+            console.log(videoData);
+        }
+        function confirmTasks() {
+            console.log(videoData);
+            console.log(taskList);
+            if (videoData && taskList.length > 0) {
+                videoData.task_ids = taskList.join(',');
+                $.post('{% url "user-addVideo" %}', videoData, function (data) {
+                    $('.task-selections').hide();
+                    layer.msg(data.msg)
+                });
+            }
+
+        }
+
+        function cancel() {
+            $('.task-selections').hide();
+        }
         function getYMDHMS(timestamp) {
             var date = new Date(timestamp * 1000);
             var YY = date.getFullYear() + '-';

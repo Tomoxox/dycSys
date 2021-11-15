@@ -122,9 +122,10 @@
                 dict.day = day;
                 dict.words = wordArr.join(',');
                 if (wordArr.length < 1){
-                    layer.msg('请至少添加一个匹配词');
-                    return false;
-                }
+                    {#layer.msg('请至少添加一个匹配词');#}
+                    {#return false;#}
+                    dict.words = null;
+                 }
                 $.post('',dict,function (res) {
                     alert(res.msg)
                 })

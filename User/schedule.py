@@ -47,7 +47,12 @@ def taskBegin(task):
                 video.comment_num = firstPage['total']
                 video.save()
                 # 未采集过
-                match_arr = task.filter_words.split(',')
+                task.filter_words = '' if not task.filter_words else task.filter_words
+                if task.filter_words == '':
+                    match_arr = []
+                else:
+                    match_arr = task.filter_words.split(',')
+
                 if old_comment_num == 0 and firstPage['has_more'] == 1:
                     for page in range(1, math.ceil(video.comment_num / 20) + 1):
                         if page == 1:
@@ -64,7 +69,7 @@ def taskBegin(task):
                                 for word in match_arr:
                                     if word in comm['text']:
                                         hit.append(word)
-                                if len(hit) > 0:
+                                if len(hit) > 0 or len(match_arr) == 0:
 
                                     '''---------------------------'''
                                     # 保存评论
@@ -102,7 +107,7 @@ def taskBegin(task):
                                 for word in match_arr:
                                     if word in comm['text']:
                                         hit.append(word)
-                                if len(hit) > 0:
+                                if len(hit) > 0 or len(match_arr) == 0:
 
                                     '''---------------------------'''
                                     # 保存评论
@@ -164,7 +169,12 @@ def taskBegin(task):
                     peerV.comment_num = firstPage['total']
                     peerV.save()
                     # 未采集过
-                    match_arr = task.filter_words.split(',')
+                    task.filter_words = '' if not task.filter_words else task.filter_words
+                    if task.filter_words == '':
+                        match_arr = []
+                    else:
+                        match_arr = task.filter_words.split(',')
+
                     if old_comment_num == 0 and firstPage['has_more'] == 1:
                         for page in range(1, math.ceil(peerV.comment_num / 20) + 1):
                             if page == 1:
@@ -181,7 +191,7 @@ def taskBegin(task):
                                     for word in match_arr:
                                         if word in comm['text']:
                                             hit.append(word)
-                                    if len(hit) > 0:
+                                    if len(hit) > 0 or len(match_arr) == 0:
 
                                         '''---------------------------'''
                                         # 保存评论
@@ -222,7 +232,7 @@ def taskBegin(task):
                                     for word in match_arr:
                                         if word in comm['text']:
                                             hit.append(word)
-                                    if len(hit) > 0:
+                                    if len(hit) > 0 or len(match_arr) == 0:
                                         '''---------------------------'''
                                         # 保存评论
                                         if checkNSubCommentNum(task.Customer_id):
@@ -349,24 +359,7 @@ def addTask(task):
 
 
 def testTask(request):
-    # task = Task.objects.filter(status=0).all()
-    # logger = logging.getLogger('django')
-    # logger.error(task)
-    # taskBegin(task)
-    # thread_task1 = threading.Thread(target=test1, args=(3,))
-    # thread_task2 = threading.Thread(target=test2, args=(10,))
-    # thread_task1.start()
-    # thread_task2.start()
-    # print('-----------000000')
+
     return HttpResponse(f'testTask: {datetime.now()}')
 
-# def test1(arg):
-#     while arg > 0:
-#         print('-----------1')
-#         time.sleep(1)
-#         arg -=1
-#     print('-----------ok 1')
-#
-# def test2(arg):
-#     print('-----------2')
-#     # sys.exit()
+
