@@ -395,6 +395,15 @@ def videoMonitor(request):
         return AjaxReturn(1, 'success', data, count)
     return render(request, 'user/monitor/videoMonitor.html', locals())
 
+@require_POST
+def deleteVideo(request):
+    id = request.POST.get('idsStr')
+    customer = request.session['customer']
+    video = Video.objects.filter(id=id, Customer_id=customer['id']).get()
+    if video:
+        video.is_deleted = 1
+        video.save()
+    return AjaxReturn(1, '删除成功')
 
 def taskCenter(request):
     tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()

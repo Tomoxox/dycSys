@@ -129,7 +129,7 @@
 				layer.close(index);
 				let idsStr = okUtils.tableBatchCheck(table);
 				if (idsStr) {
-					okUtils.ajax("/product/deleteProduct", "delete", {idsStr: idsStr}, true).done(function (response) {
+					okUtils.ajax("/deleteVideo", "post", {idsStr: idsStr}, true).done(function (response) {
 						okUtils.tableSuccessMsg(response.msg);
 					}).fail(function (error) {
 						console.log(error);
@@ -152,7 +152,7 @@
 
 		function deleteById(id) {
 			okLayer.confirm("确定要删除吗？", function () {
-				okUtils.ajax("/product/deleteProduct", "delete", {idsStr: id}).done(function (response) {
+				okUtils.ajax("/deleteVideo", "post", {idsStr: id}).done(function (response) {
 					okUtils.tableSuccessMsg(response.msg);
 				}).fail(function (error) {
 					console.log(error);
