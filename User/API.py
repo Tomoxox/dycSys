@@ -27,15 +27,15 @@ def dy_sign(method,kw=None,page=1):
         "cookie":cookie
     }
 
-    # proxy = getProxy(0)
-    # if not proxy:
-    #     return
-    # proxies = {
-    #     "http": "http://%(proxy)s/" % {'proxy': proxy},
-    #     "https": "http://%(proxy)s/" % {'proxy': proxy}
-    # }
-    # e = requests.get(d, headers=headers, proxies=proxies)
-    e = requests.get(d, headers=headers)
+    proxy = getProxy(0)
+    if not proxy:
+        return
+    proxies = {
+        "http": "http://%(proxy)s/" % {'proxy': proxy},
+        "https": "http://%(proxy)s/" % {'proxy': proxy}
+    }
+    e = requests.get(d, headers=headers, proxies=proxies)
+    # e = requests.get(d, headers=headers)
     try:
         data = e.json()
         return data
