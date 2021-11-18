@@ -10,8 +10,8 @@ _proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num
 
 def dy_sign(method,kw=None,page=1):
     red = redis.Redis(host='localhost', port=6379, decode_responses=True)
-    cookie = red.get('cookie')
-    # cookie = get_cookies()
+    # cookie = red.get('cookie')
+    cookie = get_cookies()
     # print(cookie)
     current_work_dir = os.path.dirname(__file__)
     js_path = os.path.join(current_work_dir, 'signature.js')
