@@ -90,8 +90,8 @@ def getProxy(taskId):
     expire_task = 'expire_task' + str(taskId)
     red = redis.Redis(host='localhost', port=6379, decode_responses=True)
     ip = red.get(ip_task)
-    if not ip:
-    # if True:
+    # if not ip:
+    if True:
         ip,exp = req()
         red.set(ip_task,ip)
         red.set(expire_task,exp)
