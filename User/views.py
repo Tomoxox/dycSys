@@ -237,6 +237,7 @@ def leftMenus(request):
 def search(request):
     scene = request.POST.get('scene', '')
     keyword = request.POST.get('keyword', '')
+    print(keyword)
     if scene == 'hot_words':
         return AjaxReturn(1, '获取成功', dy_sign('search_sug', keyword))
     if scene == 'hot_videos':

@@ -107,7 +107,7 @@
 
     <script>
         okLoading.close();
-        let day = {{ task.id | default:0 }};
+        let day = {{ task.within_days | default:0 }};
         {% if task %}
         let wordArr = '{{ task.filter_words }}'.split(',');
         {% else %}

@@ -30,6 +30,7 @@ def taskBegin(task):
     # TODO 每个视频上次爬到第几页
 
     task.save()
+    now = datetime.now().timestamp()
     # 遍历task的video
     flag = True
     videoArr = task.video_set.all()
@@ -65,6 +66,8 @@ def taskBegin(task):
                             logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
                             for comm in commentData['comments']:
+                                if not isWithinDays(now,comm['create_time'],task.within_days):
+                                    break
                                 hit = []
                                 for word in match_arr:
                                     if word in comm['text']:
@@ -103,6 +106,9 @@ def taskBegin(task):
                             logger.error(f"V_comment----{len(commentData['comments'])}")
                             # 过滤任务关键词
                             for comm in commentData['comments']:
+                                if not isWithinDays(now,comm['create_time'],task.within_days):
+                                    break
+
                                 hit = []
                                 for word in match_arr:
                                     if word in comm['text']:
@@ -187,6 +193,8 @@ def taskBegin(task):
                                 logger.error(f"peer_V_comment----{len(commentData['comments'])}")
                                 # 过滤任务关键词
                                 for comm in commentData['comments']:
+                                    if not isWithinDays(now,comm['create_time'],task.within_days):
+                                        break
                                     hit = []
                                     for word in match_arr:
                                         if word in comm['text']:
@@ -228,6 +236,8 @@ def taskBegin(task):
                                 logger.error(f"peer_V_comment----{len(commentData['comments'])}")
                                 # 过滤任务关键词
                                 for comm in commentData['comments']:
+                                    if not isWithinDays(now,comm['create_time'],task.within_days):
+                                        break
                                     hit = []
                                     for word in match_arr:
                                         if word in comm['text']:
@@ -358,8 +368,18 @@ def addTask(task):
     return HttpResponse(datetime.now())
 
 
-def testTask(request):
+def isWithinDays(now,create_time,days):
+    if days == 0:
+        return True
+    if (now-create_time)/86400 <= days:
+        return True
+    else:
+        return
 
-    return HttpResponse(f'testTask: {datetime.now()}')
+def testTask(request):
+    print(datetime.now().timestamp())
+    print(datetime.now().timestamp()-1631097572)
+    print((datetime.now().timestamp()-1631097572)/86400)
+    return HttpResponse(datetime.now())
 
 

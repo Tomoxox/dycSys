@@ -20,12 +20,20 @@ def dy_sign(method,kw=None,page=1):
     d = c.call(method,kw,page)
     headers = {
         "Accept": "application/json, text/plain, */*",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "User-Agent": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
         "Referer": "https://www.douyin.com/",
         "Accept-Language": "zh-CN,zh;q=0.9",
         "cookie":cookie
     }
-    e = requests.get(d, headers=headers)
+
+    proxy = getProxy(0)
+    if not proxy:
+        return
+    proxies = {
+        "http": "http://%(proxy)s/" % {'proxy': proxy},
+        "https": "http://%(proxy)s/" % {'proxy': proxy}
+    }
+    e = requests.get(d, headers=headers, proxies=proxies)
     try:
         data = e.json()
         return data
@@ -52,7 +60,7 @@ def scrawl(method,taskId,kw=None,page=1):
     d = c.call(method,kw,page)
     headers = {
         "Accept": "application/json, text/plain, */*",
-        "User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/93.0.4577.63 Safari/537.36',
+        "User-Agent": '5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36',
         "Referer": "https://www.douyin.com/",
         "Accept-Language": "zh-CN,zh;q=0.9",
         "cookie":cookie
@@ -81,6 +89,7 @@ def getProxy(taskId):
     red = redis.Redis(host='localhost', port=6379, decode_responses=True)
     ip = red.get(ip_task)
     if not ip:
+    # if True:
         ip,exp = req()
         red.set(ip_task,ip)
         red.set(expire_task,exp)
