@@ -1,3 +1,5 @@
+var UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36';
+
 var exports = undefined
     , module = undefined
     , Image = function Image() {
@@ -45,11 +47,11 @@ var navigator = {
         }
     },
     webdriver: false,
-    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+    userAgent: "Mozilla/"+UA,
     languages: ["zh-CN", "zh"],
     appCodeName: "Mozilla",
     appName: "Netscape",
-    appVersion: "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+    appVersion: UA,
     platform: "Win32"
 };
 navigator.plugins[0]["application/x-nacl"] = MimeType;
@@ -1459,7 +1461,7 @@ function hot_topic(keyword,page) {
             "browser_language": "zh-CN",
             "browser_platform": "Win32",
             "browser_name": "Mozilla",
-            "browser_version": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+            "browser_version": UA,
             "browser_online": true
         },
         "baseURL": "",
@@ -1576,7 +1578,7 @@ function search_video(keyword,page) {
             "browser_language": "zh-CN",
             "browser_platform": "Win32",
             "browser_name": "Mozilla",
-            "browser_version": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+            "browser_version": UA,
             "browser_online": true
         },
         "baseURL": "",
@@ -1691,7 +1693,7 @@ function search_expert(keyword,page) {
             "browser_language": "zh-CN",
             "browser_platform": "Win32",
             "browser_name": "Mozilla",
-            "browser_version": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+            "browser_version": UA,
             "browser_online": true
         },
         "baseURL": "",
@@ -1801,7 +1803,7 @@ function search_sug(keyword,page) {
             "browser_language": "zh-CN",
             "browser_platform": "Win32",
             "browser_name": "Mozilla",
-            "browser_version": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+            "browser_version": UA,
             "browser_online": true
         },
         "baseURL": "",
@@ -1912,7 +1914,7 @@ function comment(aweme_id,page) {
             "browser_language": "zh-CN",
             "browser_platform": "Win32",
             "browser_name": "Mozilla",
-            "browser_version": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+            "browser_version": UA,
             "browser_online": true,
         },
         "baseURL": "", "transformRequest": [null], "transformResponse": [null], "timeout": 0,
@@ -2018,7 +2020,7 @@ function aweme_post(sec_user_id,page) {
             "cookie_enabled": true, "screen_width": 1280,
             "screen_height": 720, "browser_language": "zh-CN",
             "browser_platform": "Win32", "browser_name": "Mozilla",
-            "browser_version": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+            "browser_version": UA,
             "browser_online": true
         },
         "baseURL": "", "transformRequest": [null], "transformResponse": [null], "timeout": 0,

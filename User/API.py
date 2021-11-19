@@ -6,7 +6,7 @@ import time
 
 _proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num=1&time=5&ts=1&port=2'
 # _proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num=1&time=10&port=2'
-
+UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36'
 
 def dy_sign(method,kw=None,page=1):
     red = redis.Redis(host='localhost', port=6379, decode_responses=True)
@@ -21,7 +21,7 @@ def dy_sign(method,kw=None,page=1):
     d = c.call(method,kw,page)
     headers = {
         "Accept": "application/json, text/plain, */*",
-        "User-Agent": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+        "User-Agent": UA,
         "Referer": "https://www.douyin.com/",
         "Accept-Language": "zh-CN,zh;q=0.9",
         "cookie":cookie
@@ -36,6 +36,7 @@ def dy_sign(method,kw=None,page=1):
     # }
     # e = requests.get(d, headers=headers, proxies=proxies)
     e = requests.get(d, headers=headers)
+    print(e.content)
     try:
         data = e.json()
         return data
@@ -62,7 +63,7 @@ def scrawl(method,taskId,kw=None,page=1):
     d = c.call(method,kw,page)
     headers = {
         "Accept": "application/json, text/plain, */*",
-        "User-Agent": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+        "User-Agent": UA,
         "Referer": "https://www.douyin.com/",
         "Accept-Language": "zh-CN,zh;q=0.9",
         "cookie":cookie
@@ -172,7 +173,7 @@ class Slide(object):
                 "Connection": "keep-alive",
                 "Host": urlparse(img).hostname,
                 "Upgrade-Insecure-Requests": "1",
-                "User-Agent": "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36",
+                "User-Agent": UA,
             }
             img_res = requests.get(img, headers=headers)
             if img_res.status_code == 200:
@@ -293,7 +294,7 @@ def get_cookies():
     option.add_experimental_option('useAutomationExtension', False)
     option.add_argument("disable-blink-features")
     option.add_argument("disable-blink-features=AutomationControlled")
-    option.add_argument('user-agent=5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.164 Safari/537.36')
+    # option.add_argument('user-agent='+UA)
     driver = webdriver.Chrome(options=option,executable_path=driver_path)
     driver.get(check_url)
     import time
