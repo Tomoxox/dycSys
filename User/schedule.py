@@ -1,12 +1,13 @@
 from django.shortcuts import HttpResponse
 from _datetime import datetime
-from .browser import Browser
-import redis, json, math, re, sys, time
+import requests
+import redis, json, math, re
 from DYAdmin.models import Task, Customer, Peer, PeerVideo, Comment
 import threading
 from .API import scrawl, dy_sign
 import logging
 from django.db import DatabaseError, transaction
+from utils.general import AjaxReturn
 
 # Redis keys
 TASK_LIST = 'TASK_LIST'
@@ -377,9 +378,8 @@ def isWithinDays(now,create_time,days):
         return
 
 def testTask(request):
-    print(datetime.now().timestamp())
-    print(datetime.now().timestamp()-1631097572)
-    print((datetime.now().timestamp()-1631097572)/86400)
-    return HttpResponse(datetime.now())
+    # e = requests.post('http://localhost:8000/dy_sign',{'method':'search_video','kw':'周末'})
+    # return AjaxReturn(1,'获取成功',e.json())
+    pass
 
 

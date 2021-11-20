@@ -1,14 +1,15 @@
-from django.shortcuts import render, HttpResponse,redirect
+from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
 from utils.general import AjaxReturn, randomCode
 from utils.aliSMS import AliSMS
 from django.views.decorators.http import require_POST
 from DYAdmin.models import *
 from django.forms.models import model_to_dict
-from .API import dy_sign
-import json,redis
+import requests
+import json, redis
 import datetime
 from .schedule import addTask
+
 
 def login(request):
     if request.method == 'POST':
@@ -27,7 +28,7 @@ def login(request):
                 return AjaxReturn(0, '账号已封禁')
             now = datetime.datetime.now()
             if now >= customer.available_till:
-                return AjaxReturn(0,'账号已过期')
+                return AjaxReturn(0, '账号已过期')
 
             # 登录之后获取获取最新的session_key
             # session_key = request.session.session_key
@@ -36,11 +37,10 @@ def login(request):
             #     data = session.get_decoded()
             #     print(data)
 
-
-
-            customer.available_till = datetime.datetime.strftime(customer.available_till,'%Y-%m-%d')
+            customer.available_till = datetime.datetime.strftime(customer.available_till, '%Y-%m-%d')
             request.session['customer'] = model_to_dict(customer)
-            logging = CustomerLoginLogging(Customer=customer,ip=request.META.get('REMOTE_ADDR'),browser=request.META.get('HTTP_USER_AGENT'))
+            logging = CustomerLoginLogging(Customer=customer, ip=request.META.get('REMOTE_ADDR'),
+                                           browser=request.META.get('HTTP_USER_AGENT'))
             logging.save()
             return AjaxReturn(1, '登录成功')
         else:
@@ -63,7 +63,7 @@ def register(request):
         count = Customer.objects.filter(phone=phone).count()
         if count:
             return AjaxReturn(0, '用户已存在')
-        cus = Customer(phone=phone, password=password, Delegate_id=request.session.get('method',2))
+        cus = Customer(phone=phone, password=password, Delegate_id=request.session.get('method', 2))
         cus.save()
         return AjaxReturn(1, '注册成功，请先激活')
     return render(request, 'user/register.html', locals())
@@ -91,12 +91,12 @@ def index(request):
 def home(request):
     now = datetime.datetime.now()
     totalComment = Comment.objects.filter(Customer_id=request.session.get('customer')['id']).count()
-    unhandledComment = Comment.objects.filter(Customer_id=request.session.get('customer')['id'],status=0).count()
+    unhandledComment = Comment.objects.filter(Customer_id=request.session.get('customer')['id'], status=0).count()
     peerNum = Peer.objects.filter(Customer_id=request.session.get('customer')['id']).count()
     videoNum = Video.objects.filter(Customer_id=request.session.get('customer')['id']).count()
     clientNum = Consumer.objects.filter(Customer_id=request.session.get('customer')['id']).count()
     taskNum = Task.objects.filter(Customer_id=request.session.get('customer')['id']).count()
-    commentList = Comment.objects.filter(Customer_id=request.session.get('customer')['id'],is_ai=False).all()[:9]
+    commentList = Comment.objects.filter(Customer_id=request.session.get('customer')['id'], is_ai=False).all()[:9]
     return render(request, 'user/home.html', locals())
 
 
@@ -251,7 +251,7 @@ def search(request):
 def myHotWord(request):
     if request.method == 'POST':
         dic = {
-            'Customer_id':request.session.get('customer')['id']
+            'Customer_id': request.session.get('customer')['id']
         }
         input_type = request.POST.get('input_type')
         input_text = request.POST.get('input_text')
@@ -260,7 +260,7 @@ def myHotWord(request):
         page = int(request.POST.get('page', 1))
         limit = int(request.POST.get('limit', 20))
         count = MyHotWord.objects.filter(**dic).count()
-        data = MyHotWord.objects.filter(**dic).all()[(page - 1)*limit: page * limit]
+        data = MyHotWord.objects.filter(**dic).all()[(page - 1) * limit: page * limit]
         data = list(data.values())
         if hasattr(MyHotWord, 'formatData'):
             data = getattr(MyHotWord, 'formatData')(data)
@@ -277,6 +277,7 @@ def addWord(request):
         newWord = MyHotWord(words=words, index=index, Customer_id=customer['id'])
         newWord.save()
     return AjaxReturn(1, '添加成功')
+
 
 @require_POST
 def deleteMyHotWord(request):
@@ -301,9 +302,9 @@ def addVideo(request):
         'create_time': datetime.datetime.fromtimestamp(int(request.POST.get('create_time'))),
         'cover': request.POST.get('video[cover][url_list][]'),
         'like_num': request.POST.get('statistics[digg_count]'),
-        'Customer_id':request.session.get('customer')['id'],
+        'Customer_id': request.session.get('customer')['id'],
     }
-    if Video.objects.filter(Customer_id=request.session.get('customer')['id'],aweme_id=dict['aweme_id']).count() == 0:
+    if Video.objects.filter(Customer_id=request.session.get('customer')['id'], aweme_id=dict['aweme_id']).count() == 0:
         newVideo = Video(**dict)
         newVideo.save()
     else:
@@ -357,7 +358,7 @@ def douyinHot(request):
 def peerMonitor(request):
     if request.method == 'POST':
         dic = {
-            'Customer_id' : request.session.get('customer')['id']
+            'Customer_id': request.session.get('customer')['id']
         }
         input_type = request.POST.get('input_type')
         input_text = request.POST.get('input_text')
@@ -366,7 +367,7 @@ def peerMonitor(request):
         page = int(request.POST.get('page', 1))
         limit = int(request.POST.get('limit', 20))
         count = Peer.objects.filter(**dic).count()
-        data = Peer.objects.filter(**dic).all()[(page - 1)*limit: page * limit]
+        data = Peer.objects.filter(**dic).all()[(page - 1) * limit: page * limit]
         data = list(data.values())
         if hasattr(Peer, 'formatData'):
             data = getattr(Peer, 'formatData')(data)
@@ -384,17 +385,20 @@ def deletePeer(request):
         peer.save()
     return AjaxReturn(1, '删除成功')
 
+
 def videoMonitor(request):
     if request.method == 'POST':
         page = int(request.POST.get('page', 1))
         limit = int(request.POST.get('limit', 20))
         count = Video.objects.filter(Customer_id=request.session.get('customer')['id']).count()
-        data = Video.objects.filter(Customer_id=request.session.get('customer')['id']).all()[(page - 1)*limit: page * limit]
+        data = Video.objects.filter(Customer_id=request.session.get('customer')['id']).all()[
+               (page - 1) * limit: page * limit]
         data = list(data.values())
         if hasattr(Video, 'formatData'):
             data = getattr(Video, 'formatData')(data)
         return AjaxReturn(1, 'success', data, count)
     return render(request, 'user/monitor/videoMonitor.html', locals())
+
 
 @require_POST
 def deleteVideo(request):
@@ -405,6 +409,7 @@ def deleteVideo(request):
         video.is_deleted = 1
         video.save()
     return AjaxReturn(1, '删除成功')
+
 
 def taskCenter(request):
     tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
@@ -459,9 +464,9 @@ def marketingClue(request):
 def aiClue(request):
     if request.method == 'POST':
         dic = {
-            'Customer_id' : request.session.get('customer')['id'],
-            'PeerVideo__isnull' : False,
-            'is_ai' : True
+            'Customer_id': request.session.get('customer')['id'],
+            'PeerVideo__isnull': False,
+            'is_ai': True
         }
         task = request.POST.get('task')
         contact = request.POST.get('contact')
@@ -478,7 +483,7 @@ def aiClue(request):
         page = int(request.POST.get('page', 1))
         nums = int(request.POST.get('limit', 20))
         count = Comment.objects.filter(**dic).count()
-        data = Comment.objects.filter(**dic).all()[(page - 1)*nums: page*nums]
+        data = Comment.objects.filter(**dic).all()[(page - 1) * nums: page * nums]
         data = list(data.values())
         if hasattr(Comment, 'formatData'):
             data = getattr(Comment, 'formatData')(data)
@@ -486,14 +491,15 @@ def aiClue(request):
     taskList = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/sphere/aiClue.html', locals())
 
+
 @require_POST
 def updateStatusOfClue(request):
     clueId = request.POST.get('clue')
-    comm = Comment.objects.filter(Customer_id=request.session.get('customer')['id'],id=clueId).get()
+    comm = Comment.objects.filter(Customer_id=request.session.get('customer')['id'], id=clueId).get()
     if comm:
         comm.status = 1
         comm.save()
-    return AjaxReturn(1,'success')
+    return AjaxReturn(1, 'success')
 
 
 def clientProfile(request):
@@ -501,7 +507,8 @@ def clientProfile(request):
         page = int(request.POST.get('page', 1))
         nums = int(request.POST.get('limit', 20))
         count = Consumer.objects.filter(Customer_id=request.session.get('customer')['id']).count()
-        data = Consumer.objects.filter(Customer_id=request.session.get('customer')['id']).all()[(page - 1)*nums: page*nums]
+        data = Consumer.objects.filter(Customer_id=request.session.get('customer')['id']).all()[
+               (page - 1) * nums: page * nums]
         data = list(data.values())
         if hasattr(Consumer, 'formatData'):
             data = getattr(Consumer, 'formatData')(data)
@@ -518,47 +525,53 @@ def deleteMyClient(request):
         con.delete()
     return AjaxReturn(1, '删除成功')
 
-def updateClientProfile(request,clientId):
+
+def updateClientProfile(request, clientId):
     customer = request.session['customer']
-    client = Consumer.objects.filter(id=clientId,Customer_id=customer['id']).get()
+    client = Consumer.objects.filter(id=clientId, Customer_id=customer['id']).get()
     if client:
         if request.method == 'POST':
             Consumer.objects.filter(id=clientId, Customer_id=customer['id']).update(**{
-                'name':request.POST.get('name'),
-                'phone':request.POST.get('phone'),
-                'type':request.POST.get('type'),
-                'company':request.POST.get('company'),
-                'address':request.POST.get('address'),
-                'remark':request.POST.get('remark'),
+                'name': request.POST.get('name'),
+                'phone': request.POST.get('phone'),
+                'type': request.POST.get('type'),
+                'company': request.POST.get('company'),
+                'address': request.POST.get('address'),
+                'remark': request.POST.get('remark'),
             })
-            return AjaxReturn(1,'提交成交')
-        return render(request,'user/sphere/updateClientProfile.html',locals())
+            return AjaxReturn(1, '提交成交')
+        return render(request, 'user/sphere/updateClientProfile.html', locals())
+
 
 def followUpRec(request):
     if request.method == 'POST':
         return AjaxReturn(1, 'success', [], 0)
     return render(request, 'user/sphere/followUpRec.html', locals())
 
+
 @require_POST
 def addConsumers(request):
     customerId = request.session.get('customer')['id']
-    arr = request.POST.get('idsStr','')[0:-1].split(',')
-    commArr = Comment.objects.filter(pk__in=arr,Customer_id=customerId).all()
+    arr = request.POST.get('idsStr', '')[0:-1].split(',')
+    commArr = Comment.objects.filter(pk__in=arr, Customer_id=customerId).all()
     if len(commArr) > 0:
         for comm in commArr:
-            consumer = Consumer(Customer_id=customerId,uid=comm.uid,sec_uid=comm.sec_uid,nickname=comm.nickname,avatar_thumb=comm.avatar_thumb,phone=comm.phone)
+            consumer = Consumer(Customer_id=customerId, uid=comm.uid, sec_uid=comm.sec_uid, nickname=comm.nickname,
+                                avatar_thumb=comm.avatar_thumb, phone=comm.phone)
             consumer.save()
-    return AjaxReturn(1,'添加成功')
+    return AjaxReturn(1, '添加成功')
+
 
 @require_POST
 def deleteClue(request):
     customerId = request.session.get('customer')['id']
-    arr = request.POST.get('idsStr','')[0:-1].split(',')
-    commArr = Comment.objects.filter(pk__in=arr,Customer_id=customerId).all()
+    arr = request.POST.get('idsStr', '')[0:-1].split(',')
+    commArr = Comment.objects.filter(pk__in=arr, Customer_id=customerId).all()
     if len(commArr) > 0:
         for comm in commArr:
             comm.delete()
-    return AjaxReturn(1,'删除成功')
+    return AjaxReturn(1, '删除成功')
+
 
 '''
 ------------------------------------------个人中心------------------------------------------------------------
@@ -584,20 +597,20 @@ def balance(request):
 
 def updatePass(request):
     if request.method == 'POST':
-        oldPass = request.POST.get('oldPass','')
-        newPass = request.POST.get('newPass','')
-        newPass2 = request.POST.get('newPass2','')
+        oldPass = request.POST.get('oldPass', '')
+        newPass = request.POST.get('newPass', '')
+        newPass2 = request.POST.get('newPass2', '')
         if len(newPass) < 6:
-            return AjaxReturn(0,'请输入6位及以上密码')
+            return AjaxReturn(0, '请输入6位及以上密码')
         if newPass != newPass2:
-            return AjaxReturn(0,'新密码不一致')
+            return AjaxReturn(0, '新密码不一致')
         customer = request.session.get('customer')
         if oldPass != customer['password']:
             return AjaxReturn(0, '原密码错误')
         customer['password'] = newPass
         request.session['customer'] = customer
         customer = Customer.objects.filter(id=customer['id']).update(password=newPass)
-        return AjaxReturn(1,'修改成功')
+        return AjaxReturn(1, '修改成功')
     return render(request, 'user/userCenter/updatePass.html', locals())
 
 
@@ -609,7 +622,7 @@ def loginLogging(request):
         page = int(request.POST.get('page', 1))
         limit = int(request.POST.get('limit', 20))
         count = CustomerLoginLogging.objects.filter(**dic).count()
-        data = CustomerLoginLogging.objects.filter(**dic).all()[(page - 1)*limit: page * limit]
+        data = CustomerLoginLogging.objects.filter(**dic).all()[(page - 1) * limit: page * limit]
         data = list(data.values())
         if hasattr(CustomerLoginLogging, 'formatData'):
             data = getattr(CustomerLoginLogging, 'formatData')(data)
@@ -629,9 +642,10 @@ def commentPage(request, videoId):
             return AjaxReturn(1, '获取成功', dy_sign('comment', videoId, page))
     return render(request, 'user/common/commentPageA.html', locals())
 
+
 def commentPageByID(request, videoId):
     if request.method == 'POST':
-        video = Video.objects.filter(id=videoId,Customer_id=request.session.get('customer')['id']).get()
+        video = Video.objects.filter(id=videoId, Customer_id=request.session.get('customer')['id']).get()
         if video:
             page = request.POST.get('page', 1)
             return AjaxReturn(1, '获取成功', dy_sign('comment', video.aweme_id, page))
@@ -658,6 +672,7 @@ def searchVideo(request, words):
         return HttpResponse('')
     tasks = Task.objects.filter(Customer_id=request.session.get('customer')['id']).all()
     return render(request, 'user/common/searchVideoA.html', locals())
+
 
 def searchVideoByWords(request, words):
     if request.method == 'POST':
@@ -728,10 +743,21 @@ def operateTask(request):
             addTask(task)
             task.status = 1
             task.save()
-            return AjaxReturn(1,'执行中')
+            return AjaxReturn(1, '执行中')
     return AjaxReturn(1, '删除成功')
 
 
 '''
 ------------------------------------操作动作--------------------------------------------
 '''
+
+
+def dy_sign(method, kw=None, page=1):
+    red = redis.Redis(host='localhost', port=6379, decode_responses=True)
+    red.incr('searchTimes')
+    print(red.get('searchTimes'))
+    red.close()
+    url = 'http://106.75.133.156/dy_sign'
+    e = requests.post(url, {'method': method, 'kw': kw, 'page': page})
+    # print(e.content)
+    return e.json()

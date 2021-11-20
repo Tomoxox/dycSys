@@ -1569,7 +1569,7 @@ function search_video(keyword,page) {
             "query_correct_type": "1",
             "is_filter_search": "0",
             "offset": 0,
-            "count": 20,
+            "count": 24,
             "version_code": "170400",
             "version_name": "17.4.0",
             "cookie_enabled": true,
@@ -1661,7 +1661,6 @@ function search_video(keyword,page) {
     f || (f = null),
         h.send(f)
     return "https://www.douyin.com" + h._url
-
 
 }
 

@@ -36,7 +36,7 @@ def dy_sign(method,kw=None,page=1):
     # }
     # e = requests.get(d, headers=headers, proxies=proxies)
     e = requests.get(d, headers=headers)
-    print(e.content)
+    # print(e.content)
     try:
         data = e.json()
         return data
