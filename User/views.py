@@ -9,6 +9,7 @@ import requests
 import json, redis
 import datetime
 from .schedule import addTask
+from .API import dy_sign as local_dy_sign
 
 
 def login(request):
@@ -755,9 +756,19 @@ def operateTask(request):
 def dy_sign(method, kw=None, page=1):
     red = redis.Redis(host='localhost', port=6379, decode_responses=True)
     red.incr('searchTimes')
-    print(red.get('searchTimes'))
+    where = red.get('where2go')
+    if not where:
+        where = '1'
+    if where == '1':
+        red.set('where2go','2')
+    else:
+        red.set('where2go', '1')
     red.close()
-    url = 'http://106.75.133.156/dy_sign'
-    e = requests.post(url, {'method': method, 'kw': kw, 'page': page})
-    # print(e.content)
-    return e.json()
+    print(where)
+    if where == '1':
+        url = 'http://106.75.133.156/dy_sign'
+        e = requests.post(url, {'method': method, 'kw': kw, 'page': page})
+        # print(e.content)
+        return e.json()
+    else:
+        return local_dy_sign(method,kw,page)

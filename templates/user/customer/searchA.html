@@ -115,6 +115,8 @@
         let videoList = null;
         let taskList = [];
         let videoData = null;
+        let dict = {};
+        let func = null;
         layui.use(['layer', 'element', 'okLayer'], function () {
             layer = layui.layer;
             okLayer = layui.okLayer;
@@ -154,8 +156,6 @@
             }
             if (keyword !== '') {
                 layer.load();
-                let dict = {};
-                let func = null;
                 switch (tab) {
                     case '1':
                         dict.scene = 'hot_words';
@@ -173,11 +173,7 @@
                         func = hot_experts;
                         break;
                 }
-                $.post('', dict, function (data) {
-                    layer.closeAll();
-                    layer.msg(data.msg);
-                    func(data.data);
-                });
+                getData();
             }
 
         }
@@ -185,6 +181,8 @@
 
         function hot_words(data) {
             if (data.sug_list.length > 0) {
+                layer.closeAll();
+                layer.msg('获取成功');
                 $('#HOT_WORDS').empty();
                 var time = getYMDHMS(new Date().getTime() / 1000)
                 for (var i = 1; i <= data.sug_list.length; i++) {
@@ -199,11 +197,15 @@
                         '                            </td>\n' +
                         '                        </tr>')
                 }
+            }else {
+
             }
         }
 
         function hot_videos(data) {
             if (data.data.length > 0) {
+                layer.closeAll();
+                layer.msg('获取成功');
                 $('#HOT_VIDEOS').empty();
                 videoList = data.data;
                 for (var i = 0; i < data.data.length; i++) {
@@ -304,11 +306,15 @@
                         '                        </div>\n' +
                         '                    </li>')
                 }
+            }else {
+
             }
         }
 
         function hot_experts(data) {
             if (data.user_list.length > 0) {
+                layer.closeAll();
+                layer.msg('获取成功');
                 $('#HOT_EXPERTS').empty();
                 peerList = data.user_list;
                 for (var i = 0; i < data.user_list.length; i++) {
@@ -382,6 +388,8 @@
                         '    </a>\n' +
                         '</li>');
                 }
+            }else {
+
             }
         }
 
@@ -440,6 +448,17 @@
             var mm = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
             var ss = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
             return YY + MM + DD + " " + hh + mm + ss;
+        }
+        function getData() {
+            if(func && dict !== {}){
+                $.post('', dict, function (data) {
+                    func(data.data);
+                });
+            }
+        }
+        function noData() {
+            layer.msg('爬取数据中，请耐心等待');
+            getData();
         }
     </script>
 
