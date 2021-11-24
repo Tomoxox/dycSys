@@ -458,7 +458,9 @@
         }
         function noData() {
             layer.msg('爬取数据中，请耐心等待');
-            getData();
+            setTimeout(function () {
+                getData();
+            },3000);
         }
     </script>
 
