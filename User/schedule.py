@@ -55,7 +55,7 @@ def taskBegin(task):
                 else:
                     match_arr = task.filter_words.split(',')
 
-                if old_comment_num == 0 and firstPage['has_more'] == 1:
+                if old_comment_num == 0:
                     for page in range(1, math.ceil(video.comment_num / 20) + 1):
                         if page == 1:
                             commentData = firstPage
@@ -136,6 +136,7 @@ def taskBegin(task):
                             break
 
         else:
+            print('no comment')
             break
     # 更新同行视频列表 不要更新总评论数
     if flag:
