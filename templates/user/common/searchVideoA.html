@@ -75,6 +75,10 @@
         let videoList = [];
         let taskList = [];
         let videoData = null;
+        let dict = {
+                scene: 'hot_videos',
+                keyword: '{{ words }}'
+        };
         Array.prototype.remove = function (val) {
             var index = this.indexOf(val);
             if (index > -1) {
@@ -86,7 +90,7 @@
             okLayer = layui.okLayer;
         });
         $(function () {
-            search();
+            getData();
             $('.seperator').click(function () {
                 var taskId = $(this).attr('data-task-id');
                 var selected = $(this).hasClass('selected-now');
@@ -102,25 +106,15 @@
                 console.log(taskList);
             });
         });
-        function search() {
-            {#layer.load();#}
-            let dict = {
-                scene: 'hot_videos',
-                keyword: '{{ words }}'
-            }
-            $.post('',dict,function (data) {
-                    layer.closeAll();
-                    layer.msg(data.msg);
-                    hot_videos(data.data);
-                    okLoading.close();
-                });
-        }
-
 
         function hot_videos(data) {
             {#console.log(data);#}
             if (data.data.length > 0) {
+                layer.closeAll();
+                layer.msg('获取成功');
+                okLoading.close();
                 $('#HOT_VIDEOS').empty();
+                videoList = data.data;
                 for (var i = 0; i < data.data.length; i++) {
                     videoList.push(data.data[i].aweme_info);
                     let awemeInfo = data.data[i].aweme_info;
@@ -220,6 +214,8 @@
                         '                        </div>\n' +
                         '                    </li>')
                 }
+            }else {
+                noData();
             }
         }
 
@@ -261,6 +257,19 @@
             var mm = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
             var ss = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
             return YY + MM + DD + " " + hh + mm + ss;
+        }
+
+        function getData() {
+            $.post('', dict, function (data) {
+                hot_videos(data.data);
+            });
+        }
+
+        function noData() {
+            layer.msg('爬取数据中，请耐心等待');
+            setTimeout(function () {
+                getData();
+            },3000);
         }
     </script>
 
