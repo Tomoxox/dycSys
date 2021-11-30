@@ -4,8 +4,9 @@ import os
 import redis
 import time
 
-_proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num=1&time=5&ts=1&port=2'
+# _proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num=1&time=5&ts=1&port=2'
 # _proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num=1&time=10&port=2'
+_proxyUrl = 'http://api.tianqiip.com/getip?secret=3azei8uonu1y8246&type=json&num=1&time=15&ts=1&port=2'
 UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36'
 
 def dy_sign(method,kw=None,page=1):

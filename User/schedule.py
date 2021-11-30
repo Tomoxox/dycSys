@@ -95,7 +95,8 @@ def taskBegin(task):
                             break
                 elif firstPage['has_more'] == 1 and flag:
                     # 搜头几页
-                    totalPage = math.ceil((video.comment_num - old_comment_num) / 20) + 2
+                    # totalPage = math.ceil((video.comment_num - old_comment_num) / 20) + 2
+                    totalPage = math.ceil(video.comment_num / 20) + 2
                     for page in range(1, totalPage):
                         if page == 1:
                             commentData = firstPage
