@@ -86,7 +86,7 @@ def taskBegin(task):
                                         break
 
                                 # 保存赞超过50的
-                                elif comm['digg_count'] >= 50:
+                                elif comm['digg_count'] >= 100:
                                     if Comment.objects.filter(cid=comm['cid'],
                                                               Task_id=task.id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit, is_ai=1)
@@ -128,7 +128,7 @@ def taskBegin(task):
                                         break
 
                                 # 保存赞超过50的
-                                elif comm['digg_count'] >= 50:
+                                elif comm['digg_count'] >= 100:
                                     if Comment.objects.filter(cid=comm['cid'],
                                                               Task_id=task.id).count() == 0:
                                         saveComment(comm, task.Customer_id, task.id, video.id, hit, is_ai=1)
@@ -306,6 +306,7 @@ def saveComment(comm, Customer_id, Task_id, Video_id, hit, is_ai=0, is_peerVideo
         'cid': comm['cid'],
         'uid': comm['user']['uid'],
         'sec_uid': comm['user']['sec_uid'],
+        'short_id': comm['user']['short_id'],
         'unique_id': comm['user']['unique_id'],
         'nickname': comm['user']['nickname'],
         'avatar_thumb': comm['user']['avatar_thumb']['url_list'][0],
