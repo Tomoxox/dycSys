@@ -95,7 +95,7 @@
                 url: '/aiClue',
                 method: 'POST',
                 limit: 20,
-                limits: [10,20,30,50,100,200,500],
+                limits: [10,20,30,50,100,200,500,5000],
                 page: true,
                 even: true,
                 toolbar: "#toolbarTpl",
@@ -115,6 +115,7 @@
                     {field: "created_at", align: 'center', title: "采集时间", width: 150},
                     {field: "uid", align: 'center', title: "UID", width: 100},
                     {field: "unique_id", align: 'center', title: "抖音号", width: 100},
+                    {field: "sec_uid", align: 'center', title: "SEC_UID", width: 100},
                 ]],
                 done: function (res, curr, count) {
                     console.log(res, curr, count)
