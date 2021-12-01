@@ -10,8 +10,8 @@ def login(request):
         captcha = request.POST.get('code')
         if captcha.upper() != request.session.get('captcha'):
             return AjaxReturn(0,'验证码错误')
-        username = request.POST.get('user')
-        password = request.POST.get('pass')
+        username = request.POST.get('phone')
+        password = request.POST.get('password')
         # 超级管理员 delegateId：0  代理 delegateId：代理ID
         if username == 'chuangding8899' and password == 'cdingchina888':
             request.session['delegateId'] = 0
