@@ -747,6 +747,7 @@ class Comment(BaseModel):
     cid = models.CharField(max_length=20, null=True)
     uid = models.CharField(max_length=20, null=True)
     sec_uid = models.CharField(max_length=120, null=True)
+    short_id = models.CharField(max_length=20, null=True)
     unique_id = models.CharField(max_length=20, null=True)
     nickname = models.CharField(max_length=50, null=True)
     avatar_thumb = models.URLField(max_length=255, null=True)
