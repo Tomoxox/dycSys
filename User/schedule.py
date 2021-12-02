@@ -307,7 +307,7 @@ def saveComment(comm, Customer_id, Task_id, Video_id, hit, is_ai=0, is_peerVideo
         'uid': comm['user']['uid'],
         'sec_uid': comm['user']['sec_uid'],
         'short_id': comm['user']['short_id'],
-        'unique_id': comm['user']['unique_id'],
+        'unique_id': comm['user']['unique_id'] if comm['user']['unique_id'] !='' else comm['user']['short_id'],
         'nickname': comm['user']['nickname'],
         'avatar_thumb': comm['user']['avatar_thumb']['url_list'][0],
         'vx': vx, 'phone': phone, 'text': comm['text'],
